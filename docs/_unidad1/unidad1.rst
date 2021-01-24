@@ -124,6 +124,13 @@ En la siguiente imagen puedes ver un diagrama del proyecto:
   :align: center
   :alt: foto del proyecto
 
+
+.. image:: ../_static/montaje.jpg
+  :scale: 30%
+  :align: center
+  :alt: montaje
+
+
 No es necesario que prepares un hardware exactamente igual a ese. En nuestro caso 
 podemos simular la entrada y la salida. Por tanto, vamos a necesitar:
 
@@ -167,7 +174,7 @@ En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desar
 
 
 .. image:: ../_static/montaje.jpg
-  :scale: 25%
+  :scale: 30%
   :align: center
   :alt: montaje
 
