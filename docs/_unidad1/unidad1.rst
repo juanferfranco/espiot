@@ -171,7 +171,6 @@ En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desar
   :align: center
   :alt: montaje
 
-
 ..
   .. blockdiag::
 
