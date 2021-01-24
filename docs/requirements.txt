@@ -1,0 +1,7 @@
+# This is a list of python packages used to generate documentation. This file is used with pip:
+# pip install --user -r requirements.txt
+
+sphinxcontrib-blockdiag==2.0.0
+sphinxcontrib-seqdiag==2.0.0
+sphinxcontrib-actdiag==2.0.0
+sphinxcontrib-nwdiag==2.0.0
