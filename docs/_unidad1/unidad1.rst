@@ -166,7 +166,7 @@ podemos simular la entrada y la salida. Por tanto, vamos a necesitar:
 En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desarrollo:
 
 
-.. image:: ../_static/montaje.jpg
+.. image:: ../_static/jumpstart-outlet.png
   :scale: 25%
   :align: center
   :alt: montaje
