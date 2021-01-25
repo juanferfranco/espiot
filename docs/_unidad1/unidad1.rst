@@ -78,8 +78,8 @@ Ejercicios
 En esta sección te voy a dejar ejercicios para que trabajes esta semana y en la sesión 
 del viernes los revisemos y discutamos entre todos.
 
-Ejercicio 1
-^^^^^^^^^^^^
+Ejercicio 1: reflexión sobre herramientas profesionales
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Como ya hemos discutido, este curso se estructura alrededor de un proyecto de PRODUCCIÓN. Aquí 
 la palabra PRODUCCIÓN es clave. En Internet vas a encontrar MUCHOS recursos relacionados 
@@ -92,7 +92,9 @@ sistema embebido para uso comercial, entre ellas, las más importantes en relaci
 al software son:
 
 * Usar frameworks IoT de producción, probados para aplicaciones comerciales y con 
-  buen soporte por parte del fabricante.
+  buen soporte por parte del fabricante. ¿Qué es un framework? son el conjunto 
+  de drivers para los periféricos del microcontrolador, el sistema operativo y 
+  los componentes de software necesarios para construir aplicaciones IoT completas.
 * Es ideal que el framework sea open source. No hay sistemas perfectos y siempre 
   es bueno que tengas la posibilidad de resolver problemas tu mismo.
 * Debes considerar que la configuración (provisioning) del dispositivo sea escalable. 
@@ -109,8 +111,8 @@ al software son:
 
 ¿Ves por qué no es tan fácil hacer un producto IoT comercial?
 
-Ejercicio 2
-^^^^^^^^^^^^
+Ejercicio 2: hardware a comprar para el curso
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ¿Qué necesitas comprar para realizar el curso?
 
@@ -171,132 +173,191 @@ En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desar
   :align: center
   :alt: montaje
 
-..
-  .. blockdiag::
+Ejercicio 3: instalación del software
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-      blockdiag {
+Ahora que ya tienes el hardware para trabajar, el paso siguiente es que instales 
+las herramientas de software para programar el microcontrolador. Ten en presente 
+que las herramientas funcionan en Windows, MacOS y Linux.
 
-      # node connections
-      patient <- sensors [folded];
-      sensors -> ESP32 -> notification -> doctor;
-      ESP32 -> cloud -> database;
+Hay varias versiones de las herramientas y el framework; sin embargo, la versión 
+estable es la recomendada para producción: VERSIÓN 4.2 (no lo olvides).
 
-      # node attributes
-      patient [shape=actor];
-      sensors [shape=flowchart.input, color=lightyellow];
-      ESP32 [shape=roundedbox, width=60, height=60, color="#BC1F28", fontsize=14];
-      notification [shape=mail];
-      doctor [shape=actor];
-      cloud [shape=cloud, color=lightblue];
-      database [shape=flowchart.database, color=lightgrey];
+La documentación que seguiremos para el curso está en 
+`este sitio <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html>`__ 
 
-      }
+Sigue los 10 pasos que encontrarás `aquí <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html>`__. 
+para la instalación de la herramientas. Recuerda que hay instrucciones para cada sistema 
+operativo.  
+
+Ejercicio 4: editor de código
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En el ejercicio anterior instalaste dos cosas: el framework esp-idf y las herramientas 
+para generar los programas ejecutables que correrá el ESP32. En este ejercicio vas 
+a instalar un editor de código.
+
+* Descarga e instala en tu sistemas operativo `Visual Studio Code <https://code.visualstudio.com/>`__. 
+  Esta será la herramienta en la cual vas a escribir el código.
+
+* Luego instala la extensión C/C++ que observas la siguiente imagen para mejorar 
+  la experiencia de escritura de código C gracias a la característica de IntelliSense.
+ 
+.. image:: ../_static/vscExt.png
+  :scale: 50%
+  :align: center
+  :alt: C/C++ extension
+
+Ejercicio 5: programa de prueba
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este ejercicio vas a crear una aplicación simple para probar la integración 
+de todas las herramientas que hemos instalada hasta ahora.
+
+* Copia el proyecto ``esp-idf/examples/get-started/hello_world`` en una carpeta 
+  donde tendrás los proyectos del curso.
+
+* Abre la carpeta del proyecto usando Visual Studio Code.
+
+* Crea en la carpeta raíz del proyecto la carpeta ``.vscode`` y dentro de esa 
+  carpeta el archivo ``c_cpp_properties.json``. Este último archivo te permitirá
+  autocompletar el código, navegarlo, etc. Debes ver algo similar a esto:
+
+  .. image:: ../_static/intelisense.png
+    :scale: 50%
+    :align: center
+    :alt: C/C++ extension
 
 
+  En cuanto al archivo ``c_cpp_properties.json``:
 
+  .. code-block:: javascript
+    :linenos:
 
-  .. blockdiag::
-
-      blockdiag admin {
-          // Set node metrix
-          node_width = 100;
-          node_height = 50;
-          default_shape = roundedbox;
-
-
-          top_page -> config -> config_edit -> config_confirm -> top_page;
-      }
-
-  .. blockdiag::
-    :desctable:
-
-    blockdiag {
-        A -> B -> C;
-        A [description = "browsers in each client"];
-        B [description = "web server"];
-        C [description = "database server"];
+    {
+        "configurations": [
+          {
+            "name": "Linux",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "/home/juanfranco/esp-idf-course/esp-idf/components/**",
+                "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
+                "${workspaceFolder}/**"
+            ],
+            
+            "browse": {
+                "path": [
+                    "/home/juanfranco/esp-idf-course/esp-idf/components",
+                    "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+          }
+        ],
+        "version": 4
     }
 
-  .. seqdiag::
+* En el archivo ``c_cpp_properties.json`` debes ajustar unas rutas para que 
+  queden acordes a tu computador:
 
-      seqdiag admin {
-        A -> B -> C;
-      }
+  .. code-block:: javascript
+    :linenos:
 
-  .. wavedrom::
-      :caption: My wave figure
+		    "includePath":
+		    
+		        "/home/juanfranco/esp-idf-course/esp-idf/components/**",
+		        "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
 
-          { "signal": [
-                  { "name": "clk",  "wave": "P......" },
-                  { "name": "bus",  "wave": "x.==.=x", "data": ["head", "body", "tail", "data"] },
-                  { "name": "wire", "wave": "0.1..0." }
-          ]}
+		    "browse":
+		        "path": [
+		            "/home/juanfranco/esp-idf-course/esp-idf/components",
+		            "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
 
-  .. packetdiag::
+* Ahora abre el archivo hello_world_main.c y reemplaza el código por este otro:
 
-    packetdiag {
-      0-7: Source Port
-      8-15: Destination Port
-      16-31: Sequence Number
-      32-35: AckNo
-      36-39: Offset
-      40-47: Reserved
+  .. code-block:: c 
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+
+    void app_main(void)
+    {
+        for(uint8_t i = 0; i < 10; i++){
+            printf("Counter: %d\n", i);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
     }
 
-  .. rackdiag::
+* Abre la terminal: 
 
-    rackdiag {
-      8U;
+  * Si estás trabajando en Windows, recuerda que el instalador 
+    creó por ti un acceso directo llamado ``ESP-IDF Command Prompt``. Usa ese 
+    acceso directo para abrir la terminal en Windows. 
+  
+  * Si estás trabajando en Linux:
+    
+    * Si no instalaste las herramientas en el directorio ``$HOME/.espressif``,  
+      define la variable de entorno IDF_TOOLS_PATH para que 
+      apunte al directorio donde las tienes:
 
-      1: UPS [2U];
-      3: DB Server
-      4: Web Server
-      5: Web Server
-      6: Web Server
-      7: Load Balancer
-      8: L3 Switch
-    }
+      .. code-block:: bash
 
-  .. nwdiag::
+          set IDF_TOOLS_PATH = .espressif_PATH
 
-    nwdiag {
-      network dmz {
-          address = "210.x.x.x/24"
+    * Ejecuta el comando (no olvides escribir el ``.`` y luego la ruta.
 
-          web01 [address = "210.x.x.1"];
-          web02 [address = "210.x.x.2"];
-      }
-      network internal {
-          address = "172.x.x.x/24";
+      .. code-block:: bash
 
-          web01 [address = "172.x.x.1"];
-          db01;
-          app01;
-      }
-    }
+          . $HOME/esp/esp-idf/export.sh
+    
+      Si creaste un alias para este comando en el archivo ``.bashrc`` ejecútalo:
 
+      .. code-block:: bash 
 
-  .. packetdiag::
+          get_idf
 
-    packetdiag {
-      colwidth = 32
-      node_height = 72
+* Cámbiate al directorio donde está el proyecto y ejecuta los comandos:
 
-      0-15: Source Port
-      16-31: Destination Port
-      32-63: Sequence Number
-      64-95: Acknowledgment Number
-      96-99: Data Offset
-      100-105: Reserved
-      106: URG [rotate = 270]
-      107: ACK [rotate = 270]
-      108: PSH [rotate = 270]
-      109: RST [rotate = 270]
-      110: SYN [rotate = 270]
-      111: FIN [rotate = 270]
-      112-127: Window
-      128-143: Checksum
-      144-159: Urgent Pointer
-      160-191: (Options and Padding)
-      192-223: data [colheight = 3]
-      }
+  .. code-block:: bash 
+
+      idf.py build
+      idf.py -p /dev/ttyUSB0 -b 921600 flash monitor
+
+  Si todo sale bien deberías ver algo así:
+
+  .. image:: ../_static/hello_project.png
+    :scale: 100%
+    :align: center
+    :alt: resultado de la prueba
+
+* Para terminar el programa monitor presiona ``CRTL + }``.
+
+Ejercicio 6: anexo-hardware
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este curso estamos enfocados en los aspectos de programación de una aplicación 
+embebida para IoT; sin embargo, si te queda tiempo y estás interesado en la parte de hardware, 
+Te voy a invitar a que SIEMPRE, SIEMPRE despliegues una aplicación comercial con un 
+Watchdog Timer externo. Déjame insistir por favor: SIEMPRE.
+
+Te voy a dejar algunos enlaces para que revises luego, PERO por favor, míralos:
+
+* El `concepto de Watchdog Timer <http://www.ganssle.com/item/great-watchdog-timers.htm>`__ 
+  en general.
+
+* Un ejemplo de uso de un `Watchdog Timer externo <https://community.particle.io/t/improving-electron-reliability-external-watchdog-timer/34221>`__ 
+
+* Un ejemplo de un `producto comercial <https://docs.particle.io/datasheets/asset-tracking/tracker-som-datasheet/>`__ 
+  que podrías utilizar para aplicaciones de tracking.
+
+Sesión 2
+-----------
+
+En esta sesión vamos a responder dudas que tengas sobre los ejercicios de esta semana 
+y a discutir algunos conceptos clave del lenguaje de programación C que necesitarás 
+para el proyecto del curso.
+
