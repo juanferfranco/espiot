@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "/home/juanfranco/esp-idf-course/esp-idf/components/**",
+                "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
+                "${workspaceFolder}/**"
+            ],
+            
+            "browse": {
+                "path": [
+                    "/home/juanfranco/esp-idf-course/esp-idf/components",
+                    "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+        }
+    ],
+    "version": 4
+}

@@ -208,6 +208,135 @@ a instalar un editor de código.
   :align: center
   :alt: C/C++ extension
 
+Ejercicio 5
+^^^^^^^^^^^^
+
+En este ejercicio vas a crear una aplicación simple para probar la integración 
+de todas las herramientas que hemos instalada hasta ahora.
+
+* Copia el proyecto ``esp-idf/examples/get-started/hello_world`` en una carpeta 
+  donde tendrás los proyectos del curso.
+
+* Abre la carpeta del proyecto usando Visual Studio Code.
+
+* Crea en la carpeta raíz del proyecto la carpeta ``.vscode`` y dentro de esa 
+  carpeta el archivo ``c_cpp_properties.json``. Este último archivo te permitirá
+  autocompletar el código, navegarlo, etc. Debes ver algo similar a esto:
+
+  .. image:: ../_static/intelisense.png
+    :scale: 50%
+    :align: center
+    :alt: C/C++ extension
+
+
+  En cuanto al archivo ``c_cpp_properties.json``:
+
+  .. code-block:: javascript
+    :linenos:
+
+    {
+        "configurations": [
+          {
+            "name": "Linux",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "/home/juanfranco/esp-idf-course/esp-idf/components/**",
+                "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
+                "${workspaceFolder}/**"
+            ],
+            
+            "browse": {
+                "path": [
+                    "/home/juanfranco/esp-idf-course/esp-idf/components",
+                    "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+          }
+        ],
+        "version": 4
+    }
+
+* En el archivo ``c_cpp_properties.json`` debes ajustar unas rutas para que 
+  queden acordes a tu computador:
+
+  .. code-block:: javascript
+    :linenos:
+
+		    "includePath":
+		    
+		        "/home/juanfranco/esp-idf-course/esp-idf/components/**",
+		        "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
+
+		    "browse":
+		        "path": [
+		            "/home/juanfranco/esp-idf-course/esp-idf/components",
+		            "/home/juanfranco/.espressif/tools/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
+
+* Ahora abre el archivo hello_world_main.c y reemplaza el código por este otro:
+
+  .. code-block:: c 
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+
+    void app_main(void)
+    {
+        for(uint8_t i = 0; i < 10; i++){
+            printf("Counter: %d\n", i);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
+
+* Abre la terminal: 
+
+  * Si estás trabajando en Windows, recuerda que el instalador 
+    creó por ti un acceso directo llamado ``ESP-IDF Command Prompt``. Usa ese 
+    acceso directo para abrir la terminal en Windows. 
+  
+  * Si estás trabajando en Linux:
+    
+    * Si no instalaste las herramientas en el directorio ``$HOME/.espressif``,  
+      define la variable de entorno IDF_TOOLS_PATH para que 
+      apunte al directorio donde las tienes:
+
+      .. code-block:: bash
+
+          set IDF_TOOLS_PATH = .espressif_PATH
+
+    * Ejecuta el comando (no olvides escribir el ``.`` y luego la ruta.
+
+      .. code-block:: bash
+
+          . $HOME/esp/esp-idf/export.sh
+    
+      Si creaste un alias para este comando en el archivo ``.bashrc`` ejecútalo:
+
+      .. code-block:: bash 
+
+          get_idf
+
+* Cámbiate al directorio donde está el proyecto y ejecuta los comandos:
+
+  .. code-block:: bash 
+
+      idf.py build
+      idf.py -p /dev/ttyUSB0 -b 921600 flash monitor
+
+  Si todo sale bien deberías ver algo así:
+
+  .. image:: ../_static/hello_project.png
+    :scale: 100%
+    :align: center
+    :alt: resultado de la prueba
+
+* Para terminar el programa monitor presiona ``CRTL + }``.
+
+
 ..
   .. blockdiag::
 
