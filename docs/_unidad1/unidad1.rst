@@ -354,3 +354,10 @@ Te voy a dejar algunos enlaces para que revises luego, PERO por favor, míralos:
 * Un ejemplo de un `producto comercial <https://docs.particle.io/datasheets/asset-tracking/tracker-som-datasheet/>`__ 
   que podrías utilizar para aplicaciones de tracking.
 
+Sesión 2
+-----------
+
+En esta sesión vamos a responder dudas que tengas sobre los ejercicios de esta semana 
+y a discutir algunos conceptos clave del lenguaje de programación C que necesitarás 
+para el proyecto del curso.
+
