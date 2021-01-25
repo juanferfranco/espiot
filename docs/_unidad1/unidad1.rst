@@ -78,8 +78,8 @@ Ejercicios
 En esta sección te voy a dejar ejercicios para que trabajes esta semana y en la sesión 
 del viernes los revisemos y discutamos entre todos.
 
-Ejercicio 1
-^^^^^^^^^^^^
+Ejercicio 1: reflexión sobre herramientas profesionales
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Como ya hemos discutido, este curso se estructura alrededor de un proyecto de PRODUCCIÓN. Aquí 
 la palabra PRODUCCIÓN es clave. En Internet vas a encontrar MUCHOS recursos relacionados 
@@ -111,8 +111,8 @@ al software son:
 
 ¿Ves por qué no es tan fácil hacer un producto IoT comercial?
 
-Ejercicio 2
-^^^^^^^^^^^^
+Ejercicio 2: hardware a comprar para el curso
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ¿Qué necesitas comprar para realizar el curso?
 
@@ -173,8 +173,8 @@ En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desar
   :align: center
   :alt: montaje
 
-Ejercicio 3
-^^^^^^^^^^^^
+Ejercicio 3: instalación del software
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ahora que ya tienes el hardware para trabajar, el paso siguiente es que instales 
 las herramientas de software para programar el microcontrolador. Ten en presente 
@@ -190,8 +190,8 @@ Sigue los 10 pasos que encontrarás `aquí <https://docs.espressif.com/projects/
 para la instalación de la herramientas. Recuerda que hay instrucciones para cada sistema 
 operativo.  
 
-Ejercicio 4
-^^^^^^^^^^^^
+Ejercicio 4: editor de código
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En el ejercicio anterior instalaste dos cosas: el framework esp-idf y las herramientas 
 para generar los programas ejecutables que correrá el ESP32. En este ejercicio vas 
@@ -208,8 +208,8 @@ a instalar un editor de código.
   :align: center
   :alt: C/C++ extension
 
-Ejercicio 5
-^^^^^^^^^^^^
+Ejercicio 5: programa de prueba
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En este ejercicio vas a crear una aplicación simple para probar la integración 
 de todas las herramientas que hemos instalada hasta ahora.
@@ -335,4 +335,22 @@ de todas las herramientas que hemos instalada hasta ahora.
     :alt: resultado de la prueba
 
 * Para terminar el programa monitor presiona ``CRTL + }``.
+
+Ejercicio 6: anexo-hardware
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este curso estamos enfocados en los aspectos de programación de una aplicación 
+embebida para IoT; sin embargo, si te queda tiempo y estás interesado en la parte de hardware, 
+Te voy a invitar a que SIEMPRE, SIEMPRE despliegues una aplicación comercial con un 
+Watchdog Timer externo. Déjame insistir por favor: SIEMPRE.
+
+Te voy a dejar algunos enlaces para que revises luego, PERO por favor, míralos:
+
+* El `concepto de Watchdog Timer <http://www.ganssle.com/item/great-watchdog-timers.htm>`__ 
+  en general.
+
+* Un ejemplo de uso de un `Watchdog Timer externo <https://community.particle.io/t/improving-electron-reliability-external-watchdog-timer/34221>`__ 
+
+* Un ejemplo de un `producto comercial <https://docs.particle.io/datasheets/asset-tracking/tracker-som-datasheet/>`__ 
+  que podrías utilizar para aplicaciones de tracking.
 
