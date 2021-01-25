@@ -171,6 +171,24 @@ En mi caso te dejo un ejemplo de cómo quedó el montaje con mi sistema de desar
   :align: center
   :alt: montaje
 
+Ejercicio 3
+^^^^^^^^^^^^
+
+Ahora que ya tienes el hardware para trabajar, el paso siguiente es que instales 
+las herramientas de software para programar el microcontrolador. Ten en presente 
+que las herramientas funcionan en Windows, MacOS y Linux.
+
+Hay varias versiones de las herramientas y el framework; sin embargo, la versión 
+estable es la recomendada para producción.
+
+La documentación que seguiremos para el curso está en 
+`este sitio <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html>`__ 
+
+Sigue los 10 pasos que encontrarás `aquí <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html>`__. 
+para la instalación de la herramientas. Recuerda que hay instrucciones para cada sistema 
+operativo.  
+
+
 ..
   .. blockdiag::
 
