@@ -92,7 +92,9 @@ sistema embebido para uso comercial, entre ellas, las más importantes en relaci
 al software son:
 
 * Usar frameworks IoT de producción, probados para aplicaciones comerciales y con 
-  buen soporte por parte del fabricante.
+  buen soporte por parte del fabricante. ¿Qué es un framework? son el conjunto 
+  de drivers para los periféricos del microcontrolador, el sistema operativo y 
+  los componentes de software necesarios para construir aplicaciones IoT completas.
 * Es ideal que el framework sea open source. No hay sistemas perfectos y siempre 
   es bueno que tengas la posibilidad de resolver problemas tu mismo.
 * Debes considerar que la configuración (provisioning) del dispositivo sea escalable. 
@@ -179,7 +181,7 @@ las herramientas de software para programar el microcontrolador. Ten en presente
 que las herramientas funcionan en Windows, MacOS y Linux.
 
 Hay varias versiones de las herramientas y el framework; sin embargo, la versión 
-estable es la recomendada para producción.
+estable es la recomendada para producción: VERSIÓN 4.2 (no lo olvides).
 
 La documentación que seguiremos para el curso está en 
 `este sitio <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html>`__ 
@@ -188,6 +190,23 @@ Sigue los 10 pasos que encontrarás `aquí <https://docs.espressif.com/projects/
 para la instalación de la herramientas. Recuerda que hay instrucciones para cada sistema 
 operativo.  
 
+Ejercicio 4
+^^^^^^^^^^^^
+
+En el ejercicio anterior instalaste dos cosas: el framework esp-idf y las herramientas 
+para generar los programas ejecutables que correrá el ESP32. En este ejercicio vas 
+a instalar un editor de código.
+
+* Descarga e instala en tu sistemas operativo `Visual Studio Code <https://code.visualstudio.com/>`__. 
+  Esta será la herramienta en la cual vas a escribir el código.
+
+* Luego instala la extensión C/C++ que observas la siguiente imagen para mejorar 
+  la experiencia de escritura de código C gracias a la característica de IntelliSense.
+ 
+.. image:: ../_static/vscExt.png
+  :scale: 50%
+  :align: center
+  :alt: C/C++ extension
 
 ..
   .. blockdiag::
