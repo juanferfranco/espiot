@@ -4,6 +4,20 @@ Unidad 2: hello world
 Sesión 1
 -----------
 
+Demo 
+^^^^^^
+
+Análisis del demo
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Conceptos de programación 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Conceptos claves para los ejercicios 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
 Ejercicios
 -----------
 
@@ -25,3 +39,10 @@ uno a uno los archivos necesarios para definir el proyecto.
 
 Sesión 2
 -----------
+
+Solución de dudas de los ejercicios y retos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Aportes del grupo, comentarios, experiencias
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
