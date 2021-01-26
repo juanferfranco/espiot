@@ -306,7 +306,7 @@ de todas las herramientas que hemos instalada hasta ahora.
 
       .. code-block:: bash
 
-          set IDF_TOOLS_PATH = .espressif_PATH
+          export IDF_TOOLS_PATH = .espressif_PATH
 
     * Ejecuta el comando (no olvides escribir el ``.`` y luego la ruta.
 
