@@ -234,36 +234,35 @@ de todas las herramientas que hemos instalada hasta ahora.
   .. code-block:: javascript
     :linenos:
 
-		{
-		  "env":{
-			  "IDF_TOOLS":"/home/juanfranco/.espressif/tools",
-			  "IDF_PATH":"/home/juanfranco/esp-idf-course/esp-idf"
-		  },
+      {
+        "env":{
+          "IDF_TOOLS":"/home/juanfranco/.espressif/tools",
+          "IDF_PATH":"/home/juanfranco/esp-idf-course/esp-idf"
+        },
 
-		  "configurations": [
-        {
+        "configurations": [
+          {
             "name": "Linux",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "includePath": [
-          "${IDF_PATH}/components/**",
-          "${IDF_TOOLS}/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
-          "${workspaceFolder}/**"
+              "${IDF_PATH}/components/**",
+              "${IDF_TOOLS}/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf/**",
+              "${workspaceFolder}/**"
             ],
-            
+              
             "browse": {
-          "path": [
-              "${IDF_PATH}/components",
-              "${IDF_TOOLS}/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
-              "${workspaceFolder}"
-          ],
-          "limitSymbolsToIncludedHeaders": false
+              "path": [
+                "${IDF_PATH}/components",
+                "${IDF_TOOLS}/xtensa-esp32-elf/esp-2020r3-8.4.0/xtensa-esp32-elf",
+                "${workspaceFolder}"
+              ],
+            "limitSymbolsToIncludedHeaders": false
             }
-        }
-		  ],
-		  
-      "version": 4
-		}
+          }
+        ],
+        "version": 4
+      }
 
 * En el archivo ``c_cpp_properties.json`` debes ajustar unas rutas para que 
   queden acordes a tu computador:
@@ -271,10 +270,10 @@ de todas las herramientas que hemos instalada hasta ahora.
   .. code-block:: javascript
     :linenos:
 
-    "env":{
-			  "IDF_TOOLS":"/home/juanfranco/.espressif/tools",
-			  "IDF_PATH":"/home/juanfranco/esp-idf-course/esp-idf"
-		},
+      "env":{
+          "IDF_TOOLS":"/home/juanfranco/.espressif/tools",
+          "IDF_PATH":"/home/juanfranco/esp-idf-course/esp-idf"
+      }
 
 * Ahora abre el archivo hello_world_main.c y reemplaza el código por este otro:
 
