@@ -10,9 +10,8 @@ a proyectos de Internet de las cosas.
 
    Introducción <_intro/intro> 
    Unidad 1: presentación <_unidad1/unidad1>
-
-..
    Unidad 2: hello world <_unidad2/unidad2>
+..
    Unidad 3: drivers <_unidad3/unidad3>
    Unidad 4: conexión WiFi <_unidad4/unidad4>
    Unidad 5: configuración de la red WiFi <_unidad5/unidad5>
