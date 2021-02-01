@@ -267,6 +267,242 @@ carpeta y luego incluye uno a uno los archivos necesarios para definir el proyec
 Realiza un programa simple y comprueba que es posible construir y grabar el programa 
 en la memoria del microcontrolador.
 
+Ejercicio 9: proyecto de curso
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ahora vas a comenzar el proyecto de curso: ``ESP-Jumpstart``. NO HAGAS nada por favor, solo 
+lee el contenido de `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/introduction.html>`__ 
+enlace donde se introduce el proyecto.
+
+Luego lee `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/gettingstarted.html#>`__ 
+otro enlace. POR FAVOR, no hagas nada, solo lee. En los siguientes ejercicios te diré 
+que harás.
+
+Reflexiona con estas preguntas:
+
+* En la introducción te dicen que el proyecto que haremos en el curso es un proyecto de 
+  producción. ¿Qué deberías cambiar para personalizar tu proyecto?
+* En el proyecto de curso ¿Vamos a controlar remotamente al microcontrolador?
+* En el proyecto de curso ¿Vamos a actualizar remotamente el programa grabado en la memoria 
+  del microcontrolador?
+* ¿Cuál es la diferencia entre el ESP-IDF y el Toolchain del compilador?
+* Al instalar el entorno de trabajo para el ESP-IDF te pedí que instalaras 
+  la versión 4.2 del ESP-IDF; sin embargo, en la documentación del proyecto sugieren 
+  la versión 4.0. Lee de `este <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/versions.html>`__    
+  enlace hasta la sección ``Support Periods``. ¿Cuál será la diferencia entre la versión 
+  4.0 y la versión 4.2?
+
+Ejercicio 10: versión del ESP-IDF
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Abre el acceso directo al ESP-IDF que tienes en el escritorio de Windows. Si estás en Linux 
+no olvides ejecutar el alias get_idf para adicionar al path el entorno de trabajo.
+
+Navega hasta el último ejercicio en el que has trabajado. Graba el microcontrolador y ejecuta 
+el programa monitor. Termina el programa monitor. Sube por el terminal hasta encontrar el punto 
+donde lanzaste el monitor:
+
+.. code-block:: bash
+
+    juanfranco@pop-os:~/esp-idf-course/projects/testsClass$ idf.py monitor
+    Executing action: monitor
+    Choosing default port b'/dev/ttyUSB0' (use '-p PORT' option to set a specific serial port)
+    Running idf_monitor in directory /home/juanfranco/esp-idf-course/projects/testsClass
+    Executing "/home/juanfranco/.espressif/python_env/idf4.2_py3.8_env/bin/python /home/juanfranco/esp-idf-course/esp-idf/tools/idf_monitor.py -p /dev/ttyUSB0 -b 115200 --toolchain-prefix xtensa-esp32-elf- /home/juanfranco/esp-idf-course/projects/testsClass/build/hello-world.elf -m '/home/juanfranco/.espressif/python_env/idf4.2_py3.8_env/bin/python' '/home/juanfranco/esp-idf-course/esp-idf/tools/idf.py'"...
+    --- idf_monitor on /dev/ttyUSB0 115200 ---
+    --- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+    ets Jun  8 2016 00:22:57
+
+    rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+    configsip: 0, SPIWP:0xee
+    clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+    mode:DIO, clock div:2
+    load:0x3fff0030,len:4
+    load:0x3fff0034,len:7200
+    ho 0 tail 12 room 4
+    load:0x40078000,len:13212
+    load:0x40080400,len:4568
+    0x40080400: _init at ??:?
+
+    entry 0x400806f4
+    I (30) boot: ESP-IDF v4.2-238-g8cd16b60f 2nd stage bootloader
+
+Observa la última línea: 
+
+.. code-block:: bash
+
+    I (30) boot: ESP-IDF v4.2-238-g8cd16b60f 2nd stage bootloader
+
+Este te dice la versión del esp-idf que está usando tu programa.
+
+Ahora escribe el comando: 
+
+.. code-block:: bash
+
+    idf.py --version 
+    
+Debería ver algo similar a esto: 
+
+.. code-block:: bash
+
+    ESP-IDF v4.2-238-g8cd16b60f 
+
+Nota entonces que las versiones deben coincidir.
+
+¿Pero qué significa lo que ves?
+
+* v4.2 es la versión del framework
+* 238 es el número de commits en el repositorio público después de 
+  que el fabricante liberara la versión. Eso quiere decir que se han 
+  realizado 238 actualizaciones con mejoras o correcciones a bugs.
+* g8cd16b60f es el SHA (el hash) del commit correspondiente a esta 
+  versión del esp-idf que estamos usando.
+
+En este punto te preguntarás. ¿Para qué estamos mirando todo esto? Por que 
+en un ambiente de producción de una aplicación embebida para IoT debes tener 
+control sobre estos aspectos para poder dar el soporte apropiado a tus 
+productos.
+
+
+Ejercicio 11: actualización del esp-idf 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Abre de nuevo el acceso directo al ESP-IDF. Verifica que estás en la carpeta 
+del framework. Ejecuta el comando:
+
+.. code-block:: bash
+
+    git branch
+
+Deberías ver algo así:
+
+.. code-block:: bash
+
+    * release/v4.2
+
+¿Qué indica esto? Que tu esp-idf está en la versión 4.2, es decir,
+que tenemos ``checkout`` la versión 4.2 en nuestro computador. ¿En nuestro 
+computador tenemos más versiones? Tendrás que verificarlo. Ejecuta este comando:
+
+.. code-block:: bash
+
+    git branch -a
+
+Deberías ver algo así:
+
+.. code-block:: bash
+
+    * release/v4.2
+    remotes/origin/HEAD -> origin/master
+    remotes/origin/audio/stack_on_psram_v3.3
+    remotes/origin/ble_mesh_release/esp-ble-mesh-v0.6.1
+    remotes/origin/customer/maintain_v4.0_xiaomi_tsf_issue
+    remotes/origin/customer/maintain_xiaomi_11kv_v4.0.2
+    remotes/origin/feature/ftm_support
+    remotes/origin/ftm
+    remotes/origin/master
+    remotes/origin/release/v2.0
+    remotes/origin/release/v2.1
+    remotes/origin/release/v3.0
+    remotes/origin/release/v3.1
+    remotes/origin/release/v3.2
+    remotes/origin/release/v3.3
+    remotes/origin/release/v4.0
+    remotes/origin/release/v4.1
+    remotes/origin/release/v4.2
+
+En mi caso, solo tengo en el computador la versión v4.2 y el ``*`` al lado 
+izquierdo de la versión v4.2 indica que es la versión activa. ¿Ves que hay 
+otras entradas que dicen ``remotes``? estas son otras versiones del esp-idf que 
+están en la cuenta en GitHub del fabricante, pero localmente, solo tenemos la 
+4.2.
+
+Ahora escribe
+
+.. code-block:: bash
+
+    git status
+
+En mi caso el resultado es:
+
+.. code-block:: bash
+
+    On branch release/v4.2
+    Your branch is up to date with 'origin/release/v4.2'.
+
+    nothing to commit, working tree clean
+
+¿Qué quiere decir lo que ves? quiere decir que la rama activa 
+en este momento es la release/v4.2 y que está actualizada con 
+la rama origin/release/v4.2 que se encuentra en Internet y es 
+administrada por parte del fabricante. ¿Qué implica esto? Implica 
+que el código que tenemos en nuestro computador está sincronizado 
+con el código del fabricante y está actualizado.
+
+¿Y si no fuera así? ¿Si no estuviera sincronizado? Primero debes decidir 
+si realmente quieres la actualización. Una buena razón para querer la 
+actualización es cuando el fabricante ha corregido errores o problemas. 
+
+En este punto te voy a recomendar que instales un cliente gráfico de Git.
+A mi me gusta `este <https://www.gitkraken.com/>`__ pero puedes usar otro 
+si gustas.
+
+Una vez instales el cliente gráfico, abre el repositorio local del esp-idf.
+
+Si tu repositorio local y el remoto del fabricante está actualizado verás 
+algo similar a esto:
+
+.. image:: ../_static/esp-idf-git.png
+    :scale: 50%
+    :align: center
+    :alt: repositorio esp-idf
+
+Nota cómo el ícono de un computador y el logo del fabricante están en la 
+misma fila. Esto indica que están actualizados. Si no es así vas a darle doble 
+click a la rama release/v4.2 que tiene el ícono del computador para asegurarte que es 
+la rama activa. Luego darás click en el botón pull. Si te pide que envíes algo 
+dale click en enviar. Si todo sale bien verás que ahora los íconos estarán en la 
+misma fila y por tanto tendrás los repositorios sincronizados.
+
+Por último vas a actualizar los submódulos que tenga el repositorio. ¿Qué 
+es un submódulo? Pues es un repositorio dentro de otro repositorio.
+
+No olvides que debes estar en la raíz de la carpeta del esp-idf. Escribe 
+este comando y ya está.
+
+.. code-block:: bash
+
+    git submodule update --init --recursive
+
+Ejercicio 12: descarga del proyecto del curso 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ahora vamos a descargar todo el código del proyecto del curso. La idea es que 
+coloques este código en la carpeta donde has venido guardando todos los códigos 
+de los ejercicios. 
+
+Abre la carpeta raíz donde están todos tus ejercicios y escribe:
+
+.. code-block:: bash
+
+    git clone --recursive https://github.com/espressif/esp-jumpstart
+
+Abre la carpeta esp-jumstart. Ahí estará el proyecto completo del curso 
+dividido en 7 partes:
+
+.. code-block:: bash
+
+    1_hello_world  3_wifi_connection  5_cloud  7_mfg       components  LICENSE       README.md
+    2_drivers      4_network_config   6_ota    CHANGES.md  docs        README_cn.md
+
+Ejercicio 13: corre el proyecto 1_hello_world
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ahora abre el proyecto 1_hello_world. Realiza el build, flash, monitor.
+
+Analiza el programa. En este punto del curso deberías entender qué hace.
+
+
 Sesión 2
 -----------
 
