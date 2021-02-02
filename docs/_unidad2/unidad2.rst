@@ -502,6 +502,260 @@ Ahora abre el proyecto 1_hello_world. Realiza el build, flash, monitor.
 
 Analiza el programa. En este punto del curso deberías entender qué hace.
 
+Ejercicio 14: ¿Cómo llegamos a app_main?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este punto ya te has dado cuenta que el programa inicia ejecutando 
+la función app_main. ¿Pero quién llama a esa función? ¿Qué pasa antes de 
+que app_main sea llamada?
+
+Lee `este <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/general-notes.html>`__ 
+enlace.
+
+La idea no es que entiendas cada detalle que se discute en la lectura, pero si que reflexiones 
+sobre algunas cuestiones importantes para nuestro proyecto de curso.
+
+¿Cuántos core simétricos (similares) tiene el ESP32?  
+
+Son dos core. Uno se llama PRO y el otro CPU.
+
+¿Qué es un bootloader? 
+
+Es un programa que se encarga de cargar otro programa.
+
+¿Por qué hay dos booloaders?
+
+El primer bootloader viene grabado en una memoria interna del ESP32 (ROM). El objetivo de ese 
+bootloader es cargar un segundo bootloader que puede programar el propio usuario. En tu 
+caso el bootloader ya está programado por el fabricante. 
+
+¿Para qué sirve ese segundo booloader? 
+
+Sirve para flexibilizar el proceso de carga de tu aplicación. Por ejemplo, considera que 
+encontraste un error en tu programa y deseas hacer una actualización remota para corregir
+ese error. Para hacerlo, vas a necesitar que el programa que actualmente ejecuta el ESP32 
+descargue la nueva versión y la grabe en la memoria. En este punto pueden ocurrir dos cosas.
+La primera es que el programa se descargue y se grabe correctamente en la memoria. La segunda 
+es que por algún motivo no se pueda descargar o grabar correctamente. En el segundo caso, 
+vas a querer que el ESP32 al menos ejecute el programa que tiene ahora, aunque tenga 
+errores. En el primer caso, vas a querer ejecutar el nuevo programa. Y he aquí la pregunta del 
+millón, cuando el ESP32 se reinicie ¿Cuál aplicación se ejecutará? Pues precisamente 
+esa puede ser una función del segundo bootloader, es decir, elegir cuál de las dos versiones 
+ejecutar. Bien, y si no tuvieras dos aplicaciones grabadas en la memoria sino 3 ¿Cómo 
+haría el ESP32 para seleccionar cuál ejecutar? De nuevo, el segundo booloader podría incluir 
+un mecanismo que lea el estado de algunos pines externos del ESP32 que le indiquen cuál 
+aplicación elegir. Entonces ¿Ves el punto? el segundo bootloader te da flexibilidad.
+
+¿Qué es FreeRTOS?
+
+`FreeRTOS <https://freertos.org/>`__ es un sistema operativo de tiempo real. Una de sus 
+funciones principales es administrar el uso de los recursos de procesamiento del ESP32, 
+es decir, los core PRO y APP. Para hacer uso de esos recursos, se debe crear una 
+abstracción en el programa llamada TAREA. En principio, tu no tiene que crear ninguna 
+tarea porque en el código del esp-idf se crea una tarea por ti denominada MAIN TASK.
+
+¿Qué es una tarea?
+
+Es una abstracción del sistema operativo que permite ejecutar un flujo de instrucciones 
+de manera independiente a otras tareas o flujos de instrucciones.
+
+¿Qué es un flujo de instrucciones? 
+
+Es una secuencia de operaciones de bajo nivel (lenguaje de máquina) que debe ejecutar 
+un core de la CPU. Esas instrucciones son producidas en el proceso de construcción de 
+los programas.
+
+¿Qué parte del sistema operativo decide qué tarea será ejecutada y en cuál core de la CPU?
+
+Esa función la tiene el ``scheduler`` que es la parte del sistema operativo encargada de 
+administrar los recursos de procesamiento. 
+
+Ahora observa parte del código de MAIN TASK:
+
+.. code-block:: c
+    :linenos:
+
+    static void main_task(void* args)
+    {
+        #if !CONFIG_FREERTOS_UNICORE
+            // Wait for FreeRTOS initialization to finish on APP CPU, before replacing its startup stack
+            while (port_xSchedulerRunning[1] == 0) {
+                ;
+            }
+        #endif
+        .
+        .
+        .
+        .
+
+        #ifdef CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1
+            TaskHandle_t idle_1 = xTaskGetIdleTaskHandleForCPU(1);
+            if(idle_1 != NULL){
+                ESP_ERROR_CHECK(esp_task_wdt_add(idle_1));
+            }
+        #endif
+
+            app_main();
+            vTaskDelete(NULL);
+    }
+
+MAIN TASK llama a la función app_main.
+
+Ejercicio 15: lenguaje C- structs y pointers 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Estos dos conceptos del lenguaje C son fundamentales para comprender 
+el proyecto del curso.
+
+Comencemos con el concepto de estructura o struct. Esta facilidad 
+del lenguaje nos permite crear nuestros propios tipos de datos compuestos
+
+Considera el siguiente código tomado de un `ejemplo <https://github.com/espressif/esp-idf/blob/6e776946d01ec0d081d09000c36d23ec1d318c06/examples/peripherals/gpio/generic_gpio/main/gpio_example_main.c>`__ 
+del fabricante:
+
+.. code-block:: c
+    :linenos:
+
+    #define GPIO_OUTPUT_IO_0    18
+    #define GPIO_OUTPUT_IO_1    19
+    #define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1))
+
+    void app_main(void)
+    {
+        gpio_config_t io_conf;
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_OUTPUT;
+        io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
+        io_conf.pull_down_en = 0;
+        io_conf.pull_up_en = 0;
+        gpio_config(&io_conf);
+        .
+        .
+        .
+
+El código anterior muestra cómo configurar el pin 18 y 19 del ESP32 como dos pines de 
+salida.
+
+Para ello nota que estamos definiendo una nueva variable llamada ``io_conf``. Dicha 
+variable es un STRUCT definida así:
+
+.. code-block:: c
+    :linenos:
+
+    typedef struct {
+        uint64_t pin_bit_mask;          /*!< GPIO pin: set with bit mask, each bit maps to a GPIO */
+        gpio_mode_t mode;               /*!< GPIO mode: set input/output mode                     */
+        gpio_pullup_t pull_up_en;       /*!< GPIO pull-up                                         */
+        gpio_pulldown_t pull_down_en;   /*!< GPIO pull-down                                       */
+        gpio_int_type_t intr_type;      /*!< GPIO interrupt type                                  */
+    } gpio_config_t;
+
+Como puedes ver ``gpio_config_t`` es el nombre de la struct que te permite 
+crear un nuevo tipo de dato compuesto por otros tipos de datos: ``uint64_t``, 
+``gpio_mode_t``, ``gpio_pullup_t``, ``gpio_pulldown_t`` y ``gpio_int_type_``. 
+
+
+Ahora veamos los pointers. Nota la línea de código:
+
+.. code-block:: c
+    :linenos:
+
+    gpio_config(&io_conf);
+
+La función ``gpio_config`` está definida así:
+
+.. code-block:: c
+    :linenos:
+
+    esp_err_t gpio_config(const gpio_config_t *pGPIOConfig)
+
+``gpio_config`` devuelve un error de tipo ``esp_err_t`` y recibe 
+la dirección de una variable de tipo ``gpio_config_t``.
+
+Entonces un pointer es una variable que sirve para almacenar la dirección 
+de otra variable.
+
+Un pointer lo declaras así:
+
+.. code-block:: c
+    :linenos:
+
+    gpio_config_t *pGPIOConfig;
+
+``pGPIOConfig`` es el nombre de la variable que almacenará la dirección de una struct 
+de tipo ``gpio_config_t``. Observa la diferencia con esta declaración:gpio_config_t io_conf;
+
+.. code-block:: c
+    :linenos:
+
+    gpio_config_t io_conf;
+
+``io_conf`` es una variable que almacena una struct de tipo ``gpio_config_t``. 
+
+¿Ves la diferencia? Al colocar un ``*`` antes del nombre de la variable, estás 
+indicando que la variable será un pointer o una variable que almacena direcciones 
+de variables.
+
+¿Cómo obtengo la dirección de una variable?
+
+Es muy fácil. Solo debes utilizar el operador ``&`` antes del nombre de la variable 
+y listo.
+
+Observa de nuevo:
+
+.. code-block:: c
+    :linenos:
+
+    gpio_config(&io_conf);
+
+Y
+
+.. code-block:: c
+    :linenos:
+
+    esp_err_t gpio_config(const gpio_config_t *pGPIOConfig)
+
+
+``&io_conf`` devuelve la dirección de ``io_conf`` que será almacenada 
+en  la variable ``pGPIOConfig`` al llamar a la función ``gpio_config``.
+
+
+Ejercicio 16: un ejemplo más simple de pointers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Considera el siguiente fragmento de código:
+
+.. code-block:: c
+    :linenos:
+
+    int var = 10;
+    int *pvar = &var;
+    *pvar = *pvar + 10;
+    printf("var: %d\n", var);
+
+``var`` es una variable de tipo ``int``. ``pvar`` es una variable 
+que almacena direcciones de variable de tipo ``int``.
+
+La expresión ``*pvar`` permite referirnos a la variable. Por tanto, 
+``*pvar`` permite leer o escribir directamente la variable.
+
+Nota que ``*pvar`` es diferente a ``int *pvar``. En ``*pvar`` estás 
+accediendo a la variable cuya dirección está almacenada en ``pvar``
+y en ``int *pvar`` estás declarando una variable que almacenará 
+la dirección de otra variable de tipo ``int``.
+
+El resultado del programa programa anterior es que ``var`` será 
+igual a 20.
+
+Ejercicio 17: reto
+^^^^^^^^^^^^^^^^^^^^
+
+Crea un programa que le pase a una función la dirección de un ``int``. 
+Antes de llamar la función inicializa el ``int`` en 10, 
+imprime el valor, en la función cámbialo, a 20 y luego de la función 
+imprime de nuevo el ``int`` 
+
+
 
 Sesión 2
 -----------
