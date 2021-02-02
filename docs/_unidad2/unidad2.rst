@@ -752,9 +752,85 @@ Ejercicio 17: reto
 
 Crea un programa que le pase a una función la dirección de un ``int``. 
 Antes de llamar la función inicializa el ``int`` en 10, 
-imprime el valor, en la función cámbialo, a 20 y luego de la función 
-imprime de nuevo el ``int`` 
+imprime el valor, en la función cámbialo, a 20 y luego de llamar la función 
+imprime de nuevo el ``int``. Sería algo así:
 
+.. code-block:: c
+    :linenos:
+
+    var = 10
+    Imprimir var
+    Llamar función con la dirección de var 
+    Imprimir var de nuevo
+
+Ejercicio 18: exploremos un poco más las struct y los pointers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En el ejercicio 15 llamamos a la función ``gpio_config``:
+
+.. code-block:: c
+    :linenos:
+    
+    gpio_config(&io_conf);
+
+Recuerda cómo está definida la función:
+
+.. code-block:: c
+    :linenos:
+
+    esp_err_t gpio_config(const gpio_config_t *pGPIOConfig)
+
+En ``pGPIOConfig`` guardamos la dirección de la variable ```io_conf``.
+
+Para acceder al contenido de la variable de tipo struct cuya dirección 
+está almacenada en el puntero usamos una notación especial. Observa esta 
+parte del código interno de la función```gpio_config``:
+
+.. code-block:: c
+    :linenos:
+
+    if ((pGPIOConfig->mode) & (GPIO_MODE_DEF_OUTPUT)) {
+        if(GPIO_MASK_CONTAIN_INPUT_GPIO(gpio_pin_mask)) {
+            ESP_LOGE(GPIO_TAG, "GPIO can only be used as input mode");
+            return ESP_ERR_INVALID_ARG;
+        }
+    }
+
+Nota esta parte ``(pGPIOConfig->mode)``. Para acceder a los miembros de 
+la estructura a través del puntero usamos el operador ``->``.
+
+Observa el siguiente ejemplo:
+
+.. code-block:: c
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+    #include "driver/gpio.h"
+    #include "esp_log.h"
+    #include "string.h"
+
+    typedef struct{
+        uint8_t a;
+        uint8_t b;
+        uint8_t c;
+    } myData_t;
+
+    void funcMyDataPrint(myData_t *pmyData);
+
+    void app_main(void)
+    {
+        myData_t myData = {.a = 1, .b = 2, .c = 3};
+        funcMyDataPrint(&myData);
+    }
+
+    void funcMyDataPrint(myData_t *pmyData){
+        printf("myData.a = %d, myData.b = %d, myData.c = %d\n",pmyData->a,pmyData->b,pmyData->c);
+    }
+
+Aquí de nuevo puedes ver cómo mediante ``pmyData`` y el operador ``->`` se accede 
+a los datos la struct a través del puntero.
 
 
 Sesión 2
