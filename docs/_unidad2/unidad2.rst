@@ -832,6 +832,56 @@ Observa el siguiente ejemplo:
 Aquí de nuevo puedes ver cómo mediante ``pmyData`` y el operador ``->`` se accede 
 a los datos la struct a través del puntero.
 
+Ejercicio 19: reto struct y pointers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Considera el siguiente programa:
+
+.. code-block:: c
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+    #include "driver/gpio.h"
+    #include "esp_log.h"
+    #include "string.h"
+
+    typedef struct{
+        uint8_t a;
+        uint8_t b;
+        uint8_t c;
+    } myData_t;
+
+    void funcMyDataPrint(myData_t *pmyData);
+
+    void funcMyDataChange(myData_t myData);
+
+    void app_main(void)
+    {
+        myData_t myData = {.a = 1, .b = 2, .c = 3};
+        funcMyDataPrint(&myData);
+        funcMyDataChange(myData);
+        printf("myData.a = %d, myData.b = %d, myData.c = %d\n",myData.a,myData.b,myData.c);
+    }
+
+    void funcMyDataPrint(myData_t *pmyData){
+        printf("myData.a = %d, myData.b = %d, myData.c = %d\n",pmyData->a,pmyData->b,pmyData->c);
+    }
+
+    void funcMyDataChange(myData_t myData){
+        myData.a = 4;
+        myData.b = 5;
+        myData.c = 6;
+        printf("In function funcMyDataChange myData.a = %d\n",myData.a);
+    }
+
+Explica por qué luego de llamar la función ``funcMyDataChange`` al imprimir de nuevo 
+``myData`` los valores no han cambiado.
+
+RETO: modifica la función ``funcMyDataChange`` para que puedas modificar los 
+valores de ``myData``.
+
 
 Sesión 2
 -----------
