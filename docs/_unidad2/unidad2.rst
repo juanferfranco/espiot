@@ -882,6 +882,253 @@ Explica por qué luego de llamar la función ``funcMyDataChange`` al imprimir de
 RETO: modifica la función ``funcMyDataChange`` para que puedas modificar los 
 valores de ``myData``.
 
+Ejercicio 20: punteros a funciones
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En una variable no solo puedes guardar la dirección de otra variable. En C 
+también puedes utilizar un puntero para guardar la dirección de una función.
+
+¿Para qué sirve esto? Recuerda que estamos utilizando un framework, el 
+esp-idf. La idea de un framework es que haga muchas cosas por ti para agilizar 
+el desarrollo de tu aplicación. Tu le pides al framework que realice una operación, 
+por ejemplo, conectarse a una red WiFi. Entonces, cuando la operación se completa 
+el framework necesita avisarte. Aquí es donde utilizamos los punteros a función. 
+Tu tendrás que almacenar en una variable controlada por el framework la dirección 
+de una función que será llamada una vez la operación termine. Genial, ¿No?
+
+Considera el siguiente código tomando del fabricante. La idea de este código 
+es configurar qué función debe llamar un componente de software que permite implementar 
+la funcionalidad de un botón. El componente es muy interesante porque es capaz de 
+filtrar el ruido mecánico que produce el botón cuando se presiona y también es 
+puede detectar si dejas el botón presionado por cierto tiempo. Entonces, aquí lo 
+que hacemos es indicarle al componente, escrito por el fabricante, cuál de nuestras 
+funciones debe llamar al momento de detectar que el botón se presionó.
+
+.. code-block:: c
+    :linenos:
+
+    ...
+    static bool g_output_state;
+    
+    static void push_btn_cb(void *arg)
+    {
+        app_driver_set_state(!g_output_state);
+    }
+
+    bool app_driver_get_state(void)
+    {
+        return g_output_state;
+    }
+
+    static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
+    {
+        button_handle_t btn_handle = iot_button_create(JUMPSTART_BOARD_BUTTON_GPIO, JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL);
+        if (btn_handle) {
+            iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE, btn_cb, "RELEASE");
+        }
+    }
+
+    ...
+
+    void app_driver_init()
+    {
+        ...
+        configure_push_button(JUMPSTART_BOARD_BUTTON_GPIO, push_btn_cb);
+        ...
+    }
+
+Comienza observando la función ``app_driver_init``. Nota que estamos 
+llamando a la función ``configure_push_button``.
+
+Observa la definición de ``configure_push_button``:
+
+.. code-block:: c
+    :linenos:
+
+    static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
+
+Mira el segundo argumento:
+
+.. code-block:: c
+    :linenos:
+
+    void (*btn_cb)(void *)
+
+La variable btn_cb es un puntero a función porque ahí vamos a almacenar la dirección 
+de una función.
+
+Ahora observa cómo se declara esa variable:
+
+``btn_cb`` es una variable que almacenará la dirección ( * ) de una función que 
+recibe como argumento una dirección a cualquier cosa ( ``void * ``) y no devolverá 
+nada ( ``void`` ).
+
+Observa de nuevo:
+
+.. code-block:: c
+    :linenos:
+
+    configure_push_button(JUMPSTART_BOARD_BUTTON_GPIO, push_btn_cb);
+
+Estamos almacenando en ``btn_cb`` la dirección de ``push_btn_cb``. Mira 
+como está definida la función ``push_btn_cb``:
+
+.. code-block:: c
+    :linenos:
+
+    static void push_btn_cb(void *arg)
+    {
+        app_driver_set_state(!g_output_state);
+    }
+
+¿Lo notaste? La función ``push_btn_cb`` recibe una dirección a cualquier cosa ( ``void *``)
+y no devuelve nada ( ``void`` ). Por tanto, cuando el botón se presione el componente  
+llamará la función definida por nosotros ``push_btn_cb``.
+
+Ahora veamos un ejemplo más sencillo.
+
+Ejercicio 21: punteros a funciones
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Analiza el siguiente ejemplo:
+
+.. code-block:: c
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+    #include "driver/gpio.h"
+    #include "esp_log.h"
+    #include "string.h"
+
+    int suma(int a, int b);
+    int resta(int a, int b);
+
+    void app_main(void)
+    {
+        int (*pfunction) (int,int);
+
+        pfunction = suma;
+        printf("3+2: %d\n", pfunction(3,2));
+
+        pfunction = resta;
+        printf("10-2: %d\n", pfunction(10,2));
+    }
+
+    int suma(int a, int b)
+    {
+        return a + b;
+    }
+
+    int resta(int a, int b)
+    {
+        return a - b;
+    }
+
+
+Ejercicio 22: PRE - reto
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+¿Recuerdas el ejercicio 4? Vas a ejecutarlo de nuevo 
+pero esta vez vas a eliminar este línea ``vTaskDelay(100/portTICK_PERIOD_MS);`` 
+que está al final y esperarás varios segundos antes de ingresar un mensaje.
+
+Mira de nuevo el código sin la línea:
+
+.. code-block:: c
+    :linenos:
+
+    #include <stdio.h>
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+    #include "driver/gpio.h"
+    #include "esp_log.h"
+    #include "string.h"
+
+    void app_main(void)
+    {
+        int c;
+        char message[16];
+        uint8_t counter = 0;
+    
+        while(1)
+        {
+            c = getchar();
+    
+            if(c != EOF){
+
+                if( '\n' == c)
+                {
+                    // Termina el mensaje con 0                
+                    message[counter] = 0;
+                    // Verifica si el mensaje es hola
+                    if ( strncmp (message, "hola", strlen("hola") ) == 0)
+                    {
+                        printf(" mundo\n");
+                    }
+                    else
+                    {
+                        printf("no entiendo\n");
+                    }
+                    counter = 0;
+                }
+                else
+                {
+                    // Solo guarda un carácter si hay espacio 
+                    if( counter < ( sizeof(message) - 1 ) )
+                    {
+                        message[counter] = c;
+                        counter++;
+                    }
+                }
+            }
+        }
+    }
+
+¿Qué ocurre?
+
+Notarás que el programa se reinicia. Ahora busca algunos mensajes de error. Verás 
+algo similar a esto:
+
+.. code-block:: bash
+
+    E (95306) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+    E (95306) task_wdt:  - IDLE0 (CPU 0)
+    E (95306) task_wdt: Tasks currently running:
+    E (95306) task_wdt: CPU 0: main
+    E (95306) task_wdt: CPU 1: IDLE1
+    E (95306) task_wdt: Print CPU 0 (current core) backtrace
+
+¿Qué está pasando?
+
+Resulta que el sistema operativo tiene un mecanismo para evitar que una tarea monopolice 
+por completo algún recurso de procesamiento, es decir, algún core. Cualquier tarea 
+debe tratar de usar los recursos y devolverlos al sistema operativo. En este caso 
+la línea ``vTaskDelay(100/portTICK_PERIOD_MS);`` hace precisamente eso, es decir, 
+hace un llamado al sistema operativo diciéndole que por favor la ponga a dormir 
+100 ms y luego la active de nuevo, devolviendo efectivamente el core en el cual 
+se ejecuta.
+
+Ejercicio 23: reto
+^^^^^^^^^^^^^^^^^^^
+
+No olvides lo que aprendiste en el ejercicio anterior. Este reto consiste entonces 
+en hacer una aplicación que reciba por el puerto serial:
+
+* Dos operandos
+* Una operación: suma, resta, multiplicación.
+
+Luego, debe calcular la operación e imprimirla por el puerto serial así:
+
+.. code-block:: c
+    :linenos:
+    
+    printf("%d %s %d = %d\n", ?,?,?,pfunction(op1,op2) );
+
+Nota que previamente tendrás que configurar el puntero ``pfunction`` con 
+la operación correcta.
+
 
 Sesión 2
 -----------
