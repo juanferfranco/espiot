@@ -4,7 +4,7 @@ Unidad 2: hello world
 Sesión 1
 -----------
 
-En esta sesión haremos los siguiente:
+En esta sesión haremos lo siguiente:
 
 #. Demo de la aplicación 1_hello_world funcionando.
 #. ¿Cómo obtengo el código del proyecto?
