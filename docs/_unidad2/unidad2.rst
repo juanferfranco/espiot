@@ -1108,7 +1108,9 @@ debe tratar de usar los recursos y devolverlos al sistema operativo. En este cas
 la línea ``vTaskDelay(100/portTICK_PERIOD_MS);`` hace precisamente eso, es decir, 
 hace un llamado al sistema operativo diciéndole que por favor la ponga a dormir 
 100 ms y luego la active de nuevo, devolviendo efectivamente el core en el cual 
-se ejecuta.
+se ejecuta. Cada que esto ocurre el sistema operativo reiniciará un contador conocido 
+como Watchdog timer; sin embargo, si este contador no es reiniciado disparará un 
+reset.
 
 Ejercicio 23: reto
 ^^^^^^^^^^^^^^^^^^^
