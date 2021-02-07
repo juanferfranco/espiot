@@ -4,46 +4,15 @@ Unidad 3: drivers
 Sesión 1
 -----------
 
-En esta sesión vamos a analizar el proyecto 2_drivers que hace parte del proyecto de curso.
+En esta sesión haremos lo siguiente: 
 
-Algunos puntos ha tener presentes:
 
-* Se incluye la función ``app_driver_init()`` al código base que ya teníamos.
-* En la carpeta main se modifica el archivo CMakeLists.txt para incluir en el proceso 
-  de construcción otros archivos .c y se define un macro como parte de la línea 
-  de comandos del compilador: 
-  
-  .. code-block:: bash
+* Vamos a comenzar con el análisis de la segunda parte del proyecto de curso: ``2_drivers``.
 
-        set(JUMPSTART_BOARD "board_esp32_devkitc.h") 
-        component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")
-  
-  El macro definido es JUMPSTART_BOARD que apunta al archivo ``board_esp32_devkitc.h``
-* La mayor parte del código para este proyecto estará en el archivo ``app_driver.c`` y en el 
-  componente ``button`` que está en la carpeta components de la carpeta raíz del 
-  proyecto de curso.
-* El componente ``button`` se añade al proyecto en el archivo CMakeLists.txt que está 
-  en la raíz del directorio del proyecto.
+  * Ajustes para ejecutarlo.
+  * Estructura del proyecto.
 
-  .. code-block:: bash
-
-        set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/../components)
-
-* En esta versión del proyecto ya podremos leer la entrada y escribir la salida. En el archivo 
-  ``board_esp32_devkitc.h`` se deben definir en qué pines estará el pulsador y el LED y 
-  cuál es el nivel del pulsador al ser presionado, es decir, cuál es el nivel activo.
-
-  .. code-block:: c
-
-        #define JUMPSTART_BOARD_BUTTON_GPIO          19
-        #define JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL  0
-        #define JUMPSTART_BOARD_OUTPUT_GPIO          5 
-
-* El componente button es configurable utilizando ``menuconfig``.
-
-* El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
-  LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
-  efectivamente apagado.
+* Introducción a la técnica de modelado utilizando máquinas de estado.
 
 
 Ejercicios
@@ -173,7 +142,7 @@ estado.
 La siguiente figura muestra un posible modelo de la solución al problema:
 
 .. image:: ../_static/u2-ej23-state.png
-    :scale: 100%
+    :scale: 75%
     :align: center
     :alt: diagrama de estados de una solución
 
@@ -364,5 +333,200 @@ Y una posible implementación de la máquina de estados es esta:
       }
 
 
+Ejercicio 3: estructura de ``2_drivers``: CMakeLists.txt
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Hagamos una exploración de partes del proyecto ``2_drivers``: 
+
+* En la carpeta main se modifica el archivo CMakeLists.txt para incluir en el proceso 
+  de construcción otros archivos .c 
+  
+  .. code-block:: bash
+
+      set(COMPONENT_SRCS "app_main.c"
+              "app_driver.c"
+      )
+
+  Ten en cuenta que la propia carpeta main es UN COMPONENTE, no olvides que una aplicación 
+  para el ESP32 utilizando el esp-idf no es más que una colección de componentes con los 
+  cuales se genera el ejecutable que grabaremos en la memoria del microcontrolador.
+
+  En este caso, en el CMakeLists.txt de main estás indicando que el componente 
+  tiene dos archivos .c: ``app_main.c`` y ``app_driver.c``
+
+* ¿Cómo se transforman los archivos .c de una aplicación a un ejecutable que será almacenado 
+  en la memoria del microcontrolador? Esta es una pregunta a la que podrías dedicarle un bueno rato; 
+  sin embargo, te cuento rápidamente cómo es el proceso para que podamos seguir avanzando. Mira 
+  con detenimiento la siguiente figura que muestra los pasos:
+
+  .. image:: ../_static/c-build-pipe.png
+      :scale: 75%
+      :align: center
+      :alt: flujo de compilación en c
+
+  Como puedes ver, el proceso se compone de 4 pasos. Primero, el preprocesador procesa todas 
+  las DIRECTIVAS. En la figura, el archivo ``archivo.c`` tiene la directiva ``#include``. Nota 
+  que el procesador simplemente genera un nuevo archivo intermedio que contiene la información 
+  de ``archivo.c`` y el contenido ``archivo2.h``. Segundo, el archivo de salida del preprocesador 
+  es compilado y se genera código ensamblador, que no es más que una representación simbólica 
+  del lenguaje de máquina. Tercero, archivo se ensambla, es decir, se transforma de lenguaje 
+  de máquina simbólico a lo que usualmente denominamos unos y ceros. Mira en la figura de nuevo 
+  el contenido del archivo de salida de la fase de ensamblado. Observa esta línea: 
+
+  .. code-block:: bash
+
+      017d  mov.n a7, a1
+
+  ``017d`` es la representación binaria de la instrucción en lenguaje ensamblador ``mov.n a7, a1``. Finalmente, 
+  el cuarto paso es el enlazado. En enlazador toma TODOS los archivo ensamblados del proyecto, los combina 
+  y genera el ``archivo_ejecutable`` que grabaremos en la memoria del microcontrolador.
+
+* Volvamos al archivo ``CMakeLists.txt`` del componente ``main``. Nota las siguientes líneas:
+
+  .. code-block:: bash
+
+        set(JUMPSTART_BOARD "board_esp32_devkitc.h") 
+        component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")
+
+  ``set(JUMPSTART_BOARD "board_esp32_devkitc.h")`` crea la constante ``JUMPSTART_BOARD`` de tal manera 
+  que en otras partes del archivo ``CMakeLists.txt`` podamos usar ``JUMPSTART_BOARD`` en vez de ``board_esp32_devkitc.h``.
+  Observa que ``board_esp32_devkitc.h`` está en la carpeta main y contiene información específica del sistema 
+  de desarrollo que estamos utilizando como los puertos del pulsador y del LED y 
+  cuál es el nivel lógico que produce el pulsador al ser presionado, es decir, cuál es el nivel lógico del pulsador 
+  al activarse.
+
+  .. code-block:: c
+
+        #define JUMPSTART_BOARD_BUTTON_GPIO          19
+        #define JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL  0
+        #define JUMPSTART_BOARD_OUTPUT_GPIO          5 
+
+  Nota también la línea ``component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")``. Esta información 
+  se la pasaremos al COMPILADOR cuando compile el componente main.
+
+  Para que entiendas mucho mejor lo anterior te voy a explicar con un ejemplo sencillo. Considera este código:
+
+  .. code-block:: c
+      :linenos:
+
+      #include INCLUDE
+
+      void app_main()
+      {
+          int c = suma(VALOR1,VALOR2);
+      }
+      
+  Nota que no estamos indicando en el propio código qué es ``INCLUDE``, ``VALOR1`` y ``VALOR2``. Cuando compilemos 
+  este programa tendremos un error. Sin embargo, es posible indicarle al compilador qué valor tendrán esas constantes. 
+  Si estuviéramos llamando explícitamente al preprocesador haríamos esto:
+
+  .. code-block:: bash
+
+      xtensa-esp32-elf-gcc -DVALOR1=2 -DVALOR2=3 -DINCLUDE=\"archivo2.h\" -E archivo.c
+
+  Con este comando le decimos qué valor tendrá ``INCLUDE``, ``VALOR1`` y ``VALOR2``. Con esa información, el procesador 
+  producirá una nueva versión del archivo original a esto:
+
+  .. code-block:: c
+      :linenos:
+
+      int suma(int a, int b);
+
+      void app_main()
+      {
+          int c = suma(2,3);
+      }
+
+  Ten presente que al construir el código del componente no tenemos que llamar manualmente al preprocesador porque 
+  al hacer ``idf.py build`` todo el proceso ocurre de manera automática por nosotros; sin embargo, nota que es posible 
+  indicar personalizaciones particulares que seamos que ocurren en el procesos. ¡HERMOSO! 
+  ¿Ahora vez lo que estamos haciendo con ``component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")``?
+
+
+
+
+  El macro definido es JUMPSTART_BOARD que apunta al archivo ``board_esp32_devkitc.h``
+
+* La mayor parte del código para este proyecto estará en el archivo ``app_driver.c`` y en el 
+  componente ``button`` que está en la carpeta components de la carpeta raíz del 
+  proyecto de curso.
+* El componente ``button`` se añade al proyecto en el archivo CMakeLists.txt que está 
+  en la raíz del directorio del proyecto.
+
+  .. code-block:: bash
+
+        set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/../components)
+
+
+
+* El componente button es configurable utilizando ``menuconfig``.
+
+* El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
+  LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
+  efectivamente apagado.
+
+* En mi caso, la siguiente figura muestra el montaje que utilizaré para el proyecto de curso:
+
+  .. image:: ../_static/unit3-circuit.png
+      :scale: 75%
+      :align: center
+      :alt: montaje para el curso
+
+* El archivo ``app_priv.h`` tiene el API (application programming interface) del DRIVER. El driver 
+  es la parte de código específica de la aplicación que interactúa con los puertos de 
+  entrada/salida del ESP32. Como nota personal, la palabra ``priv`` en ``app_priv.h`` resulta 
+  infortunada porque realmente debería ``pub``, de pública, ya que las funciones que están allí 
+  son las que podemos usar desde otros archivos.
+
+  .. code-block:: c
+      :linenos:
+
+      void app_driver_init(void);
+      int app_driver_set_state(bool state);
+      bool app_driver_get_state(void);
+  
+* En el archivo ``app_priv.h`` nota la directiva del preprocesador ``#pragma once`` de la que 
+  puedes leer `aquí <https://en.wikipedia.org/wiki/Pragma_once>`__.
+
+* Observa el código ``app_main.c``:
+
+  .. code-block:: c
+      :linenos:
+
+        #include <stdio.h>
+        #include <freertos/FreeRTOS.h>
+        #include <freertos/task.h>
+        #include "app_priv.h"
+
+
+        void app_main()
+        {
+            int i = 0;
+            app_driver_init();
+            while (1) {
+                printf("[%d] Hello world!\n", i);
+                i++;
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
+            }
+        }
+
+  Nota la línea ``#include "app_priv.h"``. Esta línea te permitirá utilizar las tres funciones públicas 
+  declaradas en ``app_priv.h``. En este caso, la aplicación solo está llamando una de las tres 
+  ``app_driver_init()``.
+
+* ``app_driver.c`` utiliza el componente button. Para ello incluye el archivo ``#include <iot_button.h>``. 
+  De nuevo, ``iot_button.h`` tiene el API pública del componente button.
+
+
+
+
+
+
+
+
+
 Sesión 2
 -----------
+
+En esta sesión vamos a resolver dudas sobre los ejercicios y escuchar aportes, 
+comentarios y/o experiencias de todos.
