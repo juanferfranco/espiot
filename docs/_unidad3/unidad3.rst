@@ -462,11 +462,89 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
   el componete button que está en la carpeta ``components`` ubicada en el directorio 
   padre del directorio del proyecto.
 
-* El componente button es configurable utilizando ``menuconfig`` así:
 
-  .. code-block:: bash
+Ejercicio 4: configuración de componentes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-      idf.py manuconfig
+Recuerda que una aplicación para el ESP32 basada en el esp-idf es una combinación de 
+`componentes <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/build-system.html#overview>`__. En 
+el proyecto de esta unidad estamos utilizando varios componentes, entre ellos el componente button. ¿Qué es un 
+componente? Según Espressif, un componente es una pieza modular de código independiente que se compila como una biblioteca 
+estática y es enlazada, en el proceso de ENLACE, en la aplicación. ¿Recuerdas la figura del ejercicio anterior donde 
+se ven los pasos de transformación del código fuente al archivo ejecutable? Pues bien, en el último paso correspondiente al enlazado, 
+además de los archivos ``.o`` el enlazador puede tomar también archivos ``.a``. Los archivos ``.a`` son colecciones 
+de archivos ``.o`` denominados bibliotecas estáticas. Ahora, los componentes SE PUEDEN CONFIGURAR. Veamos cómo funciona.
+
+
+Considera el siguiente código del componente button definido en ``button.c``:
+
+.. code-block:: c
+    :linenos:
+
+    #define BUTTON_GLITCH_FILTER_TIME_MS   CONFIG_IO_GLITCH_FILTER_TIME_MS
+    static const char *TAG = "button";
+
+La constante ``#define BUTTON_GLITCH_FILTER_TIME_MS`` está definida como ``CONFIG_IO_GLITCH_FILTER_TIME_MS``; sin embargo,
+¿En dónde está definido ``CONFIG_IO_GLITCH_FILTER_TIME_MS``? Esa constante se GENERA en el proceso de construcción 
+del ejecutable y se da incluso antes del proceso de PREPROCESADO. Esto se consigue gracias al archivo ``Kconfig`` que tienen 
+aquellos componentes configurables. Por ejemplo, para el caso del componente button este es el archivo  ``Kconfig``:
+
+.. code-block:: bash
+
+    menu "Button"
+        config IO_GLITCH_FILTER_TIME_MS
+            int "IO glitch filter timer ms (10~100)"
+            range 10 100
+            default 50
+    endmenu
+
+Al realizar el proceso de construcción del ejecutable, las constantes definidas en los archivos ``Kconfig`` de todos 
+los componentes son generadas y agrupadas en el archivo ``sdkconfig`` que queda en el directorio raíz del proyecto. 
+Esto permite que el desarrollador pueda verificar la configuración de los componentes. Adicionalmente, en la carpeta ``build/config``  
+se generará el archivo sdkconfig.h con las constantes ya listas para ingresar a la fase de PREPROCESADO. Para configurar 
+cada componente se ejecuta el siguiente comando:
+
+.. code-block:: bash
+
+    idf.py menuconfig
+
+Volviendo al componente button. Su archivo ``Kconfig`` define varios asuntos:
+
+* ``menu "Button"``: crea una entrada para configurar el componente button con ``menuconfig``.
+* ``config IO_GLITCH_FILTER_TIME_MS``: define la constante a configurar del componente.
+* ``int "IO glitch filter timer ms (10~100)"``: la constante será tipo ``int`` y da una descripción.
+* ``range 10 100``: los posibles valores que puede tomar la constante.
+* ``default 50``: es el valor que tendrá por defecto la constante si no se configura.
+
+Luego de configurar así quedan parte de los archivos.
+
+``sdkconfig``:
+
+.. code-block:: bash
+
+    ...
+    #
+    # Button
+    #
+    CONFIG_IO_GLITCH_FILTER_TIME_MS=50
+    # end of Button
+  
+
+``sdkconfig.h``:
+
+.. code-block:: bash
+
+    ...
+
+    #define CONFIG_WIFI_PROV_AUTOSTOP_TIMEOUT 30
+    #define CONFIG_WPA_MBEDTLS_CRYPTO 1
+    
+    #define CONFIG_IO_GLITCH_FILTER_TIME_MS 50
+    
+    #define CONFIG_AWS_IOT_MQTT_HOST ""
+    #define CONFIG_AWS_IOT_MQTT_PORT 8883
+    ...
+
 
 * El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
   LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
