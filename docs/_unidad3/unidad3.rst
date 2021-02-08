@@ -469,12 +469,12 @@ Ejercicio 4: configuración de componentes
 Recuerda que una aplicación para el ESP32 basada en el esp-idf es una combinación de 
 `componentes <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/build-system.html#overview>`__. En 
 el proyecto de esta unidad estamos utilizando varios componentes, entre ellos el componente button. ¿Qué es un 
-componente? Según Espressif, un componente es una pieza modular de código independiente que se compila como una biblioteca 
-estática y es enlazada, en el proceso de ENLACE, en la aplicación. ¿Recuerdas la figura del ejercicio anterior donde 
-se ven los pasos de transformación del código fuente al archivo ejecutable? Pues bien, en el último paso correspondiente al enlazado, 
+componente? Según Espressif, es una pieza modular de código independiente que se compila como una biblioteca 
+estática y es enlazada, en el proceso de ENLACE, con otros componentes y archivos para generar el archivo ejecutable. 
+¿Recuerdas la figura del ejercicio anterior donde se ven los pasos de transformación del código fuente al archivo 
+ejecutable? Pues bien, en el último paso correspondiente al enlazado, 
 además de los archivos ``.o`` el enlazador puede tomar también archivos ``.a``. Los archivos ``.a`` son colecciones 
-de archivos ``.o`` denominados bibliotecas estáticas. Ahora, los componentes SE PUEDEN CONFIGURAR. Veamos cómo funciona.
-
+de archivos ``.o`` denominados bibliotecas estáticas. Ahora, los componentes SE PUEDEN CONFIGURAR. Te muestro cómo.
 
 Considera el siguiente código del componente button definido en ``button.c``:
 
@@ -485,8 +485,8 @@ Considera el siguiente código del componente button definido en ``button.c``:
     static const char *TAG = "button";
 
 La constante ``#define BUTTON_GLITCH_FILTER_TIME_MS`` está definida como ``CONFIG_IO_GLITCH_FILTER_TIME_MS``; sin embargo,
-¿En dónde está definido ``CONFIG_IO_GLITCH_FILTER_TIME_MS``? Esa constante se GENERA en el proceso de construcción 
-del ejecutable y se da incluso antes del proceso de PREPROCESADO. Esto se consigue gracias al archivo ``Kconfig`` que tienen 
+¿En dónde está definida ``CONFIG_IO_GLITCH_FILTER_TIME_MS``? Esa constante se GENERA en el proceso de construcción 
+del ejecutable antes de la etapa de PREPROCESADO. Esto se consigue gracias al archivo ``Kconfig`` que tienen 
 aquellos componentes configurables. Por ejemplo, para el caso del componente button este es el archivo  ``Kconfig``:
 
 .. code-block:: bash
@@ -511,12 +511,12 @@ cada componente se ejecuta el siguiente comando:
 Volviendo al componente button. Su archivo ``Kconfig`` define varios asuntos:
 
 * ``menu "Button"``: crea una entrada para configurar el componente button con ``menuconfig``.
-* ``config IO_GLITCH_FILTER_TIME_MS``: define la constante a configurar del componente.
-* ``int "IO glitch filter timer ms (10~100)"``: la constante será tipo ``int`` y da una descripción.
+* ``config IO_GLITCH_FILTER_TIME_MS``: define una constante a configurar del componente.
+* ``int "IO glitch filter timer ms (10~100)"``: la constante es tipo ``int`` y da una descripción.
 * ``range 10 100``: los posibles valores que puede tomar la constante.
 * ``default 50``: es el valor que tendrá por defecto la constante si no se configura.
 
-Luego de configurar así quedan parte de los archivos.
+Luego de realizar la operación ``idf.py menuconfig`` así quedan parte de los archivos.
 
 ``sdkconfig``:
 
@@ -528,7 +528,7 @@ Luego de configurar así quedan parte de los archivos.
     #
     CONFIG_IO_GLITCH_FILTER_TIME_MS=50
     # end of Button
-  
+    ...
 
 ``sdkconfig.h``:
 
@@ -545,17 +545,29 @@ Luego de configurar así quedan parte de los archivos.
     #define CONFIG_AWS_IOT_MQTT_PORT 8883
     ...
 
+Ejercicio 5: hardware para el proyecto
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
-  LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
-  efectivamente apagado.
+En este ejercicio te pediré que revises y pruebes que el hardware funciona. ¿Qué 
+necesitas para el proyecto de esta unidad? Solo un LED y un pulsador.
 
-* En mi caso, la siguiente figura muestra el montaje que utilizaré para el proyecto de curso:
+¿Cómo puedes probar que todo está bien conectado? Repasa la unidad anterior. Y toma nota de:
+
+* ¿Qué valor lógico reporta el pulsador cuando lo presionas?
+* ¿Qué valor lógico escribes en el puerto del LED para encenderlo?
+
+En mi caso, la siguiente figura muestra el montaje que utilizaré para el proyecto de curso:
 
   .. image:: ../_static/unit3-circuit.png
       :scale: 75%
       :align: center
       :alt: montaje para el curso
+
+Mi pulsador reporta 0 al presionarlo y el LED se enciende con 0.
+
+
+
+
 
 * El archivo ``app_priv.h`` tiene el API (application programming interface) del DRIVER. El driver 
   es la parte de código específica de la aplicación que interactúa con los puertos de 
@@ -601,6 +613,13 @@ Luego de configurar así quedan parte de los archivos.
 
 * ``app_driver.c`` utiliza el componente button. Para ello incluye el archivo ``#include <iot_button.h>``. 
   De nuevo, ``iot_button.h`` tiene el API pública del componente button.
+
+
+El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
+LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
+efectivamente apagado.
+
+
 
 
 
