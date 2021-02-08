@@ -445,7 +445,7 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
 
 * Ahora vamos para el archivo CMakeLists.txt en el directorio principal del proyecto:
 
-  .. code-block:: c
+  .. code-block:: bash
 
       # The following lines of boilerplate have to be in your project's
       # CMakeLists in this exact order for cmake to work correctly
@@ -735,7 +735,7 @@ Se hacen dos cosas:
     }
 
 Ejercicio 8: código del componente button: iot_button.h
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ahora si llegamos a la parte interesante de esta unidad. El análisis del componente button.
 
@@ -770,7 +770,8 @@ Ignora entonces la parte de C++.
       }
       #endif
 
-  el macro ``__cplusplus`` es un macro estándar predefinido. Puedes leer un poco más ``aquí <https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html>``__.
+
+  El macro ``__cplusplus`` es un macro estándar predefinido. Puedes leer un poco más `aquí <https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html>`__. 
   Quiere decir que son constante que la propia herramienta que compila el código C/C++ definen por ti y que puedes usar en tu código.
   En este caso lo usamos para poder USAR CÓDIGO C en un proyecto C++. Nota que simplemente lo que estamos haciendo es encapsular el código 
   de C así:
@@ -782,7 +783,7 @@ Ignora entonces la parte de C++.
 
       }
 
-  ¿Por qué? porque los compiladores de C++ utilizan una técnica llamada ``CODE MANGLING <https://en.wikipedia.org/wiki/Name_mangling>``__ 
+  ¿Por qué? porque los compiladores de C++ utilizan una técnica llamada `CODE MANGLING <https://en.wikipedia.org/wiki/Name_mangling>`__  
   que permite construir un nombre único para las funciones. Esto es muy útil cuando un programa tiene funciones con el mismo nombre pero diferentes 
   tipos de argumentos. El compilador de C++ le hace code mangling a cada función C++, pero no puede hacerle eso a las funciones de C. Por tanto,
   debemos informarle al compilador cuáles serán las funciones de C del programa para que no les aplique el code mangling a ellas.
@@ -827,7 +828,68 @@ Ignora entonces la parte de C++.
   ``iot_button_rm_cb``: elimina una de las funciones programadas con ``iot_button_set_evt_cb``.
 
 
+Ejercicio 9: código del componente button: button.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Para entender el código debes tener a la mano la definición de dos objetos: ``typedef struct button_dev button_dev_t;`` y
+``typedef struct btn_cb button_cb_t;``
+
+De dejo aquí el código a la mano con la definición del tipo de objetos.
+
+.. code-block:: c
+
+    struct btn_cb {
+        TickType_t interval;
+        button_cb cb;
+        void *arg;
+        uint8_t on_press;
+        TimerHandle_t tmr;
+        button_dev_t *pbtn;
+        button_cb_t *next_cb;
+    };
+
+    struct button_dev {
+        uint8_t io_num;
+        uint8_t active_level;
+        uint32_t serial_thres_sec;
+        uint8_t taskq_on;
+        QueueHandle_t taskq;
+        QueueHandle_t argq;
+        button_status_t state;
+        button_cb_t tap_short_cb;
+        button_cb_t tap_psh_cb;
+        button_cb_t tap_rls_cb;
+        button_cb_t press_serial_cb;
+        button_cb_t *cb_head;
+    };
+
+``button_cb_t``:
+
+* ``interval``: indica en qué momento debe llamarse la función de usuario especificada o callback.
+* ``button_cb``: almacena la dirección en memoria del callback.
+* ``arg``: almacena la dirección de memoria de los argumentos que serán pasados al callback.
+* ``on_press``: si está en 1 indica que este objeto se trata del configurado con iot_button_add_on_press_cb.
+* ``tmr``: almacena el manejador del timer por software creado en el sistema operativo.
+* ``pbtn``: almacena la dirección del button al cual está asociado este callback.
+* ``next_cb``: almacena la dirección de un nuevo callback que se le configuró al button.
+
+``button_dev_t``:
+
+* ``io_num``: almacena el número del puerto donde está conectado el pulsador.
+*  ``active_level``: almacena el estado lógico que produce el pulsador al ser presionado.
+* ``serial_thres_sec``: almacena la cantidad de tiempo que esperará el componente para iniciar el reporte (llamando tu función)
+  de manera constante que el pulsador está presionado.
+* ``taskq_on``: si está en 1 indica que el usuario programó una función con ``iot_button_add_on_release_cb``.
+* ``taskq`` y ``argq``: almacenan la dirección de la función y la dirección de los argumentos que se pasarán al programar 
+  una función con iot_button_add_on_release_cb.
+* ``state``: indica el estado del pulsador: BUTTON_STATE_IDLE (reposo), BUTTON_STATE_PUSH (se presionó), BUTTON_STATE_PRESSED (se mantuvo 
+  presionado).
+* ``tap_short_cb``: almacena la función de presionar/liberar corto.
+* ``tap_psh_cb``: almacena la función de presionar el pulsador.
+* ``tap_rls_cb``: almacena la función de liberar el pulsador.
+* `press_serial_cb`: almacena la función de pulsador continua presionado.
+* ``button_cb_t``: cada button puede tener los callback anteriores más una lista enlazada con más callback. 
+  este campo permite almacenar la dirección del siguiente callback.
 
 
 Sesión 2
