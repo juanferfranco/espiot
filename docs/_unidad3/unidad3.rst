@@ -364,12 +364,14 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
       :align: center
       :alt: flujo de compilación en c
 
+|
+
   Como puedes ver, el proceso se compone de 4 pasos. Primero, el preprocesador procesa todas 
   las DIRECTIVAS. En la figura, el archivo ``archivo.c`` tiene la directiva ``#include``. Nota 
-  que el procesador simplemente genera un nuevo archivo intermedio que contiene la información 
+  que el preprocesador simplemente genera un nuevo archivo intermedio que contiene la información 
   de ``archivo.c`` y el contenido ``archivo2.h``. Segundo, el archivo de salida del preprocesador 
   es compilado y se genera código ensamblador, que no es más que una representación simbólica 
-  del lenguaje de máquina. Tercero, archivo se ensambla, es decir, se transforma de lenguaje 
+  del lenguaje de máquina. Tercero, el archivo se ensambla, es decir, se transforma de lenguaje 
   de máquina simbólico a lo que usualmente denominamos unos y ceros. Mira en la figura de nuevo 
   el contenido del archivo de salida de la fase de ensamblado. Observa esta línea: 
 
@@ -378,7 +380,7 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
       017d  mov.n a7, a1
 
   ``017d`` es la representación binaria de la instrucción en lenguaje ensamblador ``mov.n a7, a1``. Finalmente, 
-  el cuarto paso es el enlazado. En enlazador toma TODOS los archivo ensamblados del proyecto, los combina 
+  el cuarto paso es el enlazado. El enlazador toma TODOS los archivo ensamblados del proyecto, los combina 
   y genera el ``archivo_ejecutable`` que grabaremos en la memoria del microcontrolador.
 
 * Volvamos al archivo ``CMakeLists.txt`` del componente ``main``. Nota las siguientes líneas:
@@ -393,7 +395,7 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
   Observa que ``board_esp32_devkitc.h`` está en la carpeta main y contiene información específica del sistema 
   de desarrollo que estamos utilizando como los puertos del pulsador y del LED y 
   cuál es el nivel lógico que produce el pulsador al ser presionado, es decir, cuál es el nivel lógico del pulsador 
-  al activarse.
+  al activarse. En mi caso el LED estará en el pin 5, el pulsador en el pin 19 y el estado activo del pulsador será 0.
 
   .. code-block:: c
 
@@ -402,7 +404,7 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
         #define JUMPSTART_BOARD_OUTPUT_GPIO          5 
 
   Nota también la línea ``component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")``. Esta información 
-  se la pasaremos al COMPILADOR cuando compile el componente main.
+  se la pasaremos al COMPILADOR cuando compile el componente ``main``.
 
   Para que entiendas mucho mejor lo anterior te voy a explicar con un ejemplo sencillo. Considera este código:
 
@@ -424,8 +426,8 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
 
       xtensa-esp32-elf-gcc -DVALOR1=2 -DVALOR2=3 -DINCLUDE=\"archivo2.h\" -E archivo.c
 
-  Con este comando le decimos qué valor tendrá ``INCLUDE``, ``VALOR1`` y ``VALOR2``. Con esa información, el procesador 
-  producirá una nueva versión del archivo original a esto:
+  Con este comando le decimos qué valores tendrán ``INCLUDE``, ``VALOR1`` y ``VALOR2``. Una vez preprocesado el 
+  archivo tendremos esto:
 
   .. code-block:: c
       :linenos:
@@ -438,28 +440,33 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
       }
 
   Ten presente que al construir el código del componente no tenemos que llamar manualmente al preprocesador porque 
-  al hacer ``idf.py build`` todo el proceso ocurre de manera automática por nosotros; sin embargo, nota que es posible 
-  indicar personalizaciones particulares que seamos que ocurren en el procesos. ¡HERMOSO! 
+  al hacer ``idf.py build`` todo el proceso ocurre de manera automática por nosotros ¡HERMOSO! 
   ¿Ahora vez lo que estamos haciendo con ``component_compile_options("-DJUMPSTART_BOARD=\"${JUMPSTART_BOARD}\"")``?
 
+* Ahora vamos para el archivo CMakeLists.txt en el directorio principal del proyecto:
 
+  .. code-block:: c
 
+      # The following lines of boilerplate have to be in your project's
+      # CMakeLists in this exact order for cmake to work correctly
+      cmake_minimum_required(VERSION 3.5)
 
-  El macro definido es JUMPSTART_BOARD que apunta al archivo ``board_esp32_devkitc.h``
+      set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/../components)
 
-* La mayor parte del código para este proyecto estará en el archivo ``app_driver.c`` y en el 
-  componente ``button`` que está en la carpeta components de la carpeta raíz del 
-  proyecto de curso.
-* El componente ``button`` se añade al proyecto en el archivo CMakeLists.txt que está 
-  en la raíz del directorio del proyecto.
+      include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+      project(2_drivers)
+
+  Nota que solo hay una novedad con respecto al proyecto de la unidad anterior: 
+  ``set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/../components)``. Este comando 
+  permite adicionar componentes extra al proyecto. En este caso, estamos utilizando 
+  el componete button que está en la carpeta ``components`` ubicada en el directorio 
+  padre del directorio del proyecto.
+
+* El componente button es configurable utilizando ``menuconfig`` así:
 
   .. code-block:: bash
 
-        set(EXTRA_COMPONENT_DIRS ${CMAKE_CURRENT_LIST_DIR}/../components)
-
-
-
-* El componente button es configurable utilizando ``menuconfig``.
+      idf.py manuconfig
 
 * El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
   LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
@@ -516,12 +523,6 @@ Hagamos una exploración de partes del proyecto ``2_drivers``:
 
 * ``app_driver.c`` utiliza el componente button. Para ello incluye el archivo ``#include <iot_button.h>``. 
   De nuevo, ``iot_button.h`` tiene el API pública del componente button.
-
-
-
-
-
-
 
 
 
