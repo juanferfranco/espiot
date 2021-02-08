@@ -734,6 +734,102 @@ Se hacen dos cosas:
         app_driver_set_state(!g_output_state);
     }
 
+Ejercicio 8: código del componente button: iot_button.h
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ahora si llegamos a la parte interesante de esta unidad. El análisis del componente button.
+
+Comencemos con el archivo ``iot_button.h``. Encontrarás muy interesante este archivo por una razón. 
+El componente tiene código C y C++. ¿Podemos programar en C++ el ESP32? Claro, de hecho así se hace 
+cuando trabajas con el framework de arduino. ¿Lo haremos en este curso? Nop. Solo vamos a utilizar C. 
+Ignora entonces la parte de C++.
+
+* Verás que el archivo es encabezado y termina con estas líneas:  
+
+  .. code-block:: c
+
+      #ifndef _IOT_BUTTON_H_
+      #define _IOT_BUTTON_H_
+      ...
+      #endif
+
+  Esto es una versión estándar, del ``#pragma once`` que viste en ``app_priv.h``. ¿Qué quiere decir 
+  estándar?  No todas las herramientas soportan la directiva ``#pragma once``, pero todos si soportan 
+  una definición estándar. 
+
+* Las siguiente líneas: 
+
+  .. code-block:: c
+
+      #ifdef __cplusplus
+      extern "C" {
+      #endif
+      ...
+
+      #ifdef __cplusplus
+      }
+      #endif
+
+  el macro ``__cplusplus`` es un macro estándar predefinido. Puedes leer un poco más ``aquí <https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html>``__.
+  Quiere decir que son constante que la propia herramienta que compila el código C/C++ definen por ti y que puedes usar en tu código.
+  En este caso lo usamos para poder USAR CÓDIGO C en un proyecto C++. Nota que simplemente lo que estamos haciendo es encapsular el código 
+  de C así:
+
+  .. code-block:: c
+
+      extern "C" {
+      ...
+
+      }
+
+  ¿Por qué? porque los compiladores de C++ utilizan una técnica llamada ``CODE MANGLING <https://en.wikipedia.org/wiki/Name_mangling>``__ 
+  que permite construir un nombre único para las funciones. Esto es muy útil cuando un programa tiene funciones con el mismo nombre pero diferentes 
+  tipos de argumentos. El compilador de C++ le hace code mangling a cada función C++, pero no puede hacerle eso a las funciones de C. Por tanto,
+  debemos informarle al compilador cuáles serán las funciones de C del programa para que no les aplique el code mangling a ellas.
+
+  Si no utilizamos un copilador de C++ entonces no se encerrará el código de C con las líneas:
+
+  .. code-block:: c
+
+      extern "C" {
+      ...
+
+      }
+  
+* Observa ahora las funciones públicas que tienes disponibles para usar el componente. Nota que en el propio archivo, en la parte 
+  superior de cada función te indican cómo usarla. Te dejo un listado rápido de las funciones:
+
+  .. code-block:: c
+
+      button_handle_t iot_button_create(gpio_num_t gpio_num, button_active_t active_level);
+      esp_err_t iot_button_set_serial_cb(button_handle_t btn_handle, uint32_t start_after_sec, TickType_t interval_tick, button_cb cb, void *arg);
+
+
+  ``iot_button_create``: crear un button en memoria. Debes especificar el valor lógico del botón cuando esté presionado.
+  
+  ``iot_button_set_serial_cb``: con esta función puedes indicar que se llame una de TUS FUNCIONES si luego de ``start_after_sec`` segundos 
+  el pulsador continua presionado. Mientras que el pulsador esté presionado se llamara cada ``interval_tick`` ticks tu función de manera 
+  constante.
+
+  ``iot_button_set_evt_cb``: te permite configurar el llamado de una de TUS FUNCIONES cuando ocurran estos eventos: el pulsador 
+  se presionó, el pulsador se liberó luego de ser presionado, pulsaste y soltaste rápidamente el pulsador, es decir, un TAP.
+
+  ``iot_button_add_on_press_cb``: te permite configurar el llamado a una tus funciones si dejas presionado el pulsador al menos ``press_sec`` segundos.
+
+  ``iot_button_add_on_release_cb``: te permite configurar cuál de tus funciones llamará si dejas el pulsador al menos ``press_sec`` segundos y 
+  luego liberas el pulsador. Puedes configurar varias funciones, pero siempre se llamará la más cercada al momento de liberar el pulsador, es decir,
+  si programas una función a los 2 segundos, otra a los 5 segundos y otra a los 7 segundos y el pulsador lo liberaste a los 6 segundos, solo 
+  se llamará la función programada a los 5 segundos. En el caso de ``iot_button_add_on_press_cb`` se llamarán las funciones de los 
+  2 segundos y la de los 5 segundos.
+
+  ``iot_button_delete``: destruye el componente button de la memoria.
+
+  ``iot_button_rm_cb``: elimina una de las funciones programadas con ``iot_button_set_evt_cb``.
+
+
+
+
+
 Sesión 2
 -----------
 
