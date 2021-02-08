@@ -565,15 +565,44 @@ En mi caso, la siguiente figura muestra el montaje que utilizaré para el proyec
 
 Mi pulsador reporta 0 al presionarlo y el LED se enciende con 0.
 
+Ejercicio 6: código inicial de la aplicación
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Observa el código en ``app_main.c``:
+
+.. code-block:: c
+      :linenos:
+
+      #include <stdio.h>
+      #include <freertos/FreeRTOS.h>
+      #include <freertos/task.h>
+      #include "app_priv.h"
 
 
+      void app_main()
+      {
+        int i = 0;
+        app_driver_init();
+        while (1) 
+        {
+          printf("[%d] Hello world!\n", i);
+          i++;
+          vTaskDelay(5000 / portTICK_PERIOD_MS);
+        }
+      }
 
+Nota la línea ``#include "app_priv.h"``. Esta línea te permitirá utilizar las funciones públicas 
+declaradas en ``app_priv.h``. En este caso, la aplicación solo está llamando una de ellas: 
+``app_driver_init()``.
 
-* El archivo ``app_priv.h`` tiene el API (application programming interface) del DRIVER. El driver 
-  es la parte de código específica de la aplicación que interactúa con los puertos de 
-  entrada/salida del ESP32. Como nota personal, la palabra ``priv`` en ``app_priv.h`` resulta 
-  infortunada porque realmente debería ``pub``, de pública, ya que las funciones que están allí 
-  son las que podemos usar desde otros archivos.
+Ejercicio 7: código del driver
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+El archivo ``app_priv.h`` tiene el API (application programming interface) del DRIVER. El driver 
+es la parte de código específica de la aplicación que interactúa con los puertos de 
+entrada/salida del ESP32. Como nota personal, la palabra ``priv`` en ``app_priv.h`` resulta 
+infortunada porque realmente debería ser ``pub``, de pública, ya que las funciones que están allí 
+son las que podemos usar desde otros archivos.
 
   .. code-block:: c
       :linenos:
@@ -582,46 +611,128 @@ Mi pulsador reporta 0 al presionarlo y el LED se enciende con 0.
       int app_driver_set_state(bool state);
       bool app_driver_get_state(void);
   
-* En el archivo ``app_priv.h`` nota la directiva del preprocesador ``#pragma once`` de la que 
-  puedes leer `aquí <https://en.wikipedia.org/wiki/Pragma_once>`__.
+En el archivo ``app_priv.h`` nota la directiva del preprocesador ``#pragma once`` de la que 
+puedes leer `aquí <https://en.wikipedia.org/wiki/Pragma_once>`__. Pero esa DIRECTIVA del preprocesador 
+permite que en un archivo se incluya SOLO una vez la definición de las APIs.
 
-* Observa el código ``app_main.c``:
+Ahora mira ``app_driver.c``. Este archivo define la funcionalidad de las tres funciones públicas:
+
+.. code-block:: c
+
+    void app_driver_init()
+    {
+        configure_push_button(JUMPSTART_BOARD_BUTTON_GPIO, push_btn_cb);
+
+        /* Configure output */
+        gpio_config_t io_conf = {
+            .mode = GPIO_MODE_OUTPUT,
+            .pull_up_en = 1,
+        };
+        io_conf.pin_bit_mask = ((uint64_t)1 << JUMPSTART_BOARD_OUTPUT_GPIO);
+        /* Configure the GPIO */
+        set_output_state(true);
+        gpio_config(&io_conf);
+    }
+
+    int IRAM_ATTR app_driver_set_state(bool state)
+    {
+        if(g_output_state != state) {
+            g_output_state = state;
+            set_output_state(g_output_state);
+        }
+        return ESP_OK;
+    }
+
+    bool app_driver_get_state(void)
+    {
+        return g_output_state;
+    }
+
+``app_driver.c`` tiene otras funciones PRIVADAS que no podrás llamar desde otros archivos. Estas funciones 
+están marcadas con la palabra reservada STATIC:
+
+.. code-block:: c
+
+    static void push_btn_cb(void *arg)
+    {
+        app_driver_set_state(!g_output_state);
+    }
+
+    static void configure_push_button(int gpio_num, void (*btn_cb)(void *))
+    {
+        button_handle_t btn_handle = iot_button_create(JUMPSTART_BOARD_BUTTON_GPIO, JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL);
+        if (btn_handle) {
+            iot_button_set_evt_cb(btn_handle, BUTTON_CB_SERIAL, btn_cb, "RELEASE");
+        }
+    }
+
+    static void set_output_state(bool target)
+    {
+        gpio_set_level(JUMPSTART_BOARD_OUTPUT_GPIO, target);
+    }
+
+Nota que en ``app_driver.c`` también se declara una variable GLOBAL para todas las funciones definidas 
+en el archivo, pero PRIVADA para los demás archivos del proyecto, es decir, la variable solo podrá ser utilizada 
+por las funciones en ``app_driver.c``. Los otros archivos solo podrás acceder a la variable a través de la función 
+pública ``bool app_driver_get_state(void)``
+
+``app_driver.c`` define una función especial: ``app_driver_set_state``. Nota el atributo ``IRAM_ATTR``.
+¿Para qué sirve este atributo? sirve para generar código que permita cargar y ejecutar el código de máquina 
+de esta función en la memoria RAM. Ten presente que en la mayoría de sistemas embebidos, a diferencia de un computador, 
+los programas se puede ejecutar directamente desde la memoria flash, es decir, la CPU buscará directamente instrucciones 
+de esa memoria para luego decodificar y finalmente ejecutarlas. ¿Cuál es la ventaja de cargar las instrucciones en la memoria 
+RAM? El acceso por parte de la CPU es más rápido a la memoria RAM que a la FLASH. ¿Y por qué no cargamos entonces todo 
+el código de máquina a la RAM? porque no tenemos tanta. Entonces podemos cargar solo algunas partes del código. En nuestro 
+caso, cagar ``app_driver_set_state`` permitirá acelerar la ejecución de la función en el contexto de una INTERRUPCIÓN. 
+Las interrupciones son un mecanismo que permite interrumpir el flujo normal de ejecución de un programa en un CPU haciendo 
+que abandone temporalmente el programa y ejecute otro denominado servicio de atención a interrupción. En sistemas embebidos 
+se busca que los servicios de atención a interrupción sean rápidos para poder retomar de nuevo el programa principal.
+
+``app_driver.c`` hace uso del componente button. De nuevo, incluyendo el archivo con las definiciones 
+públicas del componente: ``#include <iot_button.h>``. 
+
+Mira la función ``app_driver_init()`` que modifiqué ligeramente para considerar las particularidades de mi hardware 
+o montaje:
+
+.. code-block:: c
+
+    void app_driver_init()
+    {
+        configure_push_button(JUMPSTART_BOARD_BUTTON_GPIO, push_btn_cb);
+
+        /* Configure output */
+        gpio_config_t io_conf = {
+            .mode = GPIO_MODE_OUTPUT,
+        };
+        io_conf.pin_bit_mask = ((uint64_t)1 << JUMPSTART_BOARD_OUTPUT_GPIO);
+
+        /* Configure the GPIO */
+        g_output_state = 1;
+        set_output_state(true);
+        gpio_config(&io_conf);
+    }
+
+Se hacen dos cosas:
+
+* ``configure_push_button``: Crea e inicializa un componente button. Este componente será el encargado de controlar el funcionamiento 
+  del pulsador.
+* ``/* Configure output */`` y ``/* Configure the GPIO */``: configuran el pin de salida que controlará el LED y establecen el valor 
+  inicial del LED en 1, es decir, APAGADO en mi hardware.
+
+``configure_push_button`` utiliza el componente button. Para eso se incluye el archivo ``#include <iot_button.h>``:
+
+* iot_button_create: crea el botón,
+* iot_button_set_evt_cb: configura cómo se comunicará el código del componente button con el código de la aplicación. Nota que 
+  al componete button le estamos diciendo que al liberar el pulsador luego de ser presionado (``BUTTON_CB_RELEASE``) se debe 
+  llamar la función ``push_btn_cb`` cuya dirección la guardamos en el puntero ``btn_cb`` al llamar la función ``configure_push_button``. 
+  Observa entonces que ``push_btn_cb`` simplemente cambiará de estado el LED.
 
   .. code-block:: c
-      :linenos:
 
-        #include <stdio.h>
-        #include <freertos/FreeRTOS.h>
-        #include <freertos/task.h>
-        #include "app_priv.h"
-
-
-        void app_main()
-        {
-            int i = 0;
-            app_driver_init();
-            while (1) {
-                printf("[%d] Hello world!\n", i);
-                i++;
-                vTaskDelay(5000 / portTICK_PERIOD_MS);
-            }
-        }
-
-  Nota la línea ``#include "app_priv.h"``. Esta línea te permitirá utilizar las tres funciones públicas 
-  declaradas en ``app_priv.h``. En este caso, la aplicación solo está llamando una de las tres 
-  ``app_driver_init()``.
-
-* ``app_driver.c`` utiliza el componente button. Para ello incluye el archivo ``#include <iot_button.h>``. 
-  De nuevo, ``iot_button.h`` tiene el API pública del componente button.
-
-
-El código en ``app_driver.c`` asume que el LED se activa con la salida en alto. Si tu 
-LED se activa con bajo debes modificar el código que inicializa el LED para que comience 
-efectivamente apagado.
-
-
-
-
+    static void push_btn_cb(void *arg)
+    {
+        app_driver_set_state(!g_output_state);
+    }
 
 Sesión 2
 -----------
