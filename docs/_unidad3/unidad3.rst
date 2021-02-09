@@ -950,11 +950,13 @@ La siguiente figura ilustra el funcionamiento:
     :align: center
     :alt: button onpress después de release.
 
+Ejercicio 10: código del componente button: creación 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Para entender el código debes tener a la mano la definición de dos objetos: ``typedef struct button_dev button_dev_t;`` y
 ``typedef struct btn_cb button_cb_t;``
 
-De dejo aquí el código a la mano con la definición del tipo de objetos.
+Observa la definición de los objetos:
 
 .. code-block:: c
 
@@ -983,33 +985,105 @@ De dejo aquí el código a la mano con la definición del tipo de objetos.
         button_cb_t *cb_head;
     };
 
-``button_cb_t``: objeto para configurar una función a ser llamada por el componente o callback.
+``button_cb_t``: objeto para configurar una función del usuario que llamará el componente o callback.
 
 * ``interval``: indica en qué momento debe llamarse el callback.
 * ``button_cb``: almacena la dirección en memoria del callback.
 * ``arg``: almacena la dirección de memoria de los argumentos que serán pasados al callback.
 * ``on_press``: si está en 1 indica que este objeto es para un callback programado con iot_button_add_on_press_cb.
-* ``tmr``: almacena el identificador del timer por software creado en el sistema operativo.
+* ``tmr``: almacena el identificador del timer utilizado para programar el callback.
 * ``pbtn``: almacena la dirección del button al cual está asociado este callback.
-* ``next_cb``: almacena la dirección de un nuevo callback que se le configuró al button.
+* ``next_cb``: almacena la dirección de un nuevo callback ``on_press`` y/o ``on_release`` programado al 
+  botón.
 
 ``button_dev_t``:
 
 * ``io_num``: almacena el número del puerto donde está conectado el pulsador.
 *  ``active_level``: almacena el estado lógico que produce el pulsador al ser presionado.
-* ``serial_thres_sec``: almacena la cantidad de tiempo que esperará el componente para iniciar el reporte (llamando tu función)
-  de manera constante que el pulsador está presionado.
-* ``taskq_on``: si está en 1 indica que el usuario programó una función con ``iot_button_add_on_release_cb``.
-* ``taskq`` y ``argq``: almacenan la dirección de la función y la dirección de los argumentos que se pasarán al programar 
-  una función con iot_button_add_on_release_cb.
+* ``serial_thres_sec``: almacena la cantidad de tiempo para el callback tipo ``SERIAL``.
+* ``taskq_on``: si está en 1 indica que el usuario programó al menos un callback de tipo ``on_release``.
+* ``taskq`` y ``argq``: almacenan la dirección del callback ``on_release`` y la dirección del argumento que será pasado al 
+  callback.
 * ``state``: indica el estado del pulsador: BUTTON_STATE_IDLE (reposo), BUTTON_STATE_PUSH (se presionó), BUTTON_STATE_PRESSED (se mantuvo 
   presionado).
-* ``tap_short_cb``: almacena la función de presionar/liberar corto.
-* ``tap_psh_cb``: almacena la función de presionar el pulsador.
-* ``tap_rls_cb``: almacena la función de liberar el pulsador.
-* `press_serial_cb`: almacena la función de pulsador continua presionado.
-* ``button_cb_t``: cada button puede tener los callback anteriores más una lista enlazada con más callback. 
-  este campo permite almacenar la dirección del siguiente callback.
+* ``tap_short_cb``: almacena el callback de TAP.
+* ``tap_psh_cb``: almacena el callback de PUSH.
+* ``tap_rls_cb``: almacena el callback de RELEASE (BUTTON_STATE_IDLE).
+* `press_serial_cb`: almacena la dirección del siguiente objeto de tipo ``on_press`` y/o ``on_release``.
+
+Analicemos ahora la función ``iot_button_create``:
+
+.. code-block:: c
+
+    button_handle_t iot_button_create(gpio_num_t gpio_num, button_active_t active_level)
+    {
+        IOT_CHECK(TAG, gpio_num < GPIO_NUM_MAX, NULL);
+        button_dev_t *btn = (button_dev_t *) calloc(1, sizeof(button_dev_t));
+        POINT_ASSERT(TAG, btn, NULL);
+        btn->active_level = active_level;
+        btn->io_num = gpio_num;
+        btn->state = BUTTON_STATE_IDLE;
+        btn->taskq_on = 0;
+        btn->taskq = xQueueCreate(1, sizeof(void *));
+        btn->argq = xQueueCreate(1, sizeof(void *));
+        btn->tap_rls_cb.arg = NULL;
+        btn->tap_rls_cb.cb = NULL;
+        btn->tap_rls_cb.interval = BUTTON_GLITCH_FILTER_TIME_MS / portTICK_PERIOD_MS;
+        btn->tap_rls_cb.pbtn = btn;
+        btn->tap_rls_cb.tmr = xTimerCreate("btn_rls_tmr", btn->tap_rls_cb.interval, pdFALSE,
+                                          &btn->tap_rls_cb, button_tap_rls_cb);
+        btn->tap_psh_cb.arg = NULL;
+        btn->tap_psh_cb.cb = NULL;
+        btn->tap_psh_cb.interval = BUTTON_GLITCH_FILTER_TIME_MS / portTICK_PERIOD_MS;
+        btn->tap_psh_cb.pbtn = btn;
+        btn->tap_psh_cb.tmr = xTimerCreate("btn_psh_tmr", btn->tap_psh_cb.interval, pdFALSE,
+                                          &btn->tap_psh_cb, button_tap_psh_cb);
+        gpio_install_isr_service(0);
+        gpio_config_t gpio_conf;
+        gpio_conf.intr_type = GPIO_INTR_ANYEDGE;
+        gpio_conf.mode = GPIO_MODE_INPUT;
+        gpio_conf.pin_bit_mask = (1ULL << gpio_num);
+        gpio_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        gpio_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+        gpio_config(&gpio_conf);
+        gpio_isr_handler_add(gpio_num, button_gpio_isr_handler, btn);
+        return (button_handle_t) btn;
+    }    
+
+Nota la función ``calloc``. Esta función permite crear objetos dinámicos en el ``HEAP``. Puedes leer un poco 
+más acerca del heap `aquí <https://www.geeksforgeeks.org/memory-layout-of-c-program/>`__.
+
+Nota dos llamados al sistema que estamos utilizando ``xQueueCreate`` y ``xTimerCreate``. El primero 
+sirve para crear una cola de mensajes y el segundo para crear un temporizador por software.
+
+`Las colas de mensajes <https://www.freertos.org/a00018.html>`__, como su nombre lo indican permiten intercambiar 
+información entre partes del código utilizando 
+como intermediario al sistema operativo. En este caso la cola será usada por los callback de tipo on_release para 
+almancear en una cola la dirección del callback y del argumento a llamar en este caso:
+
+.. image:: ../_static/button-releaseAfterpress.png
+    :scale: 100%
+    :align: center
+    :alt: button onpress después de release.
+
+Las colas siempre tendrán la dirección del último callback y el último argumento programado anterior al estado 
+``BUTTON_STATE_IDLE``.
+
+`Los temporizadores <https://www.freertos.org/FreeRTOS-Software-Timer-API-Functions.html>`__ por software permiten programar 
+eventos que ocurrirán en el futuro luego de cierta 
+cantidad de ticks del sistema operativo.
+
+Para entender el API de los temporizadores por software considera la siguiente figura que te será de utilidad al 
+leer el código button.c:
+
+.. image:: ../_static/softTimersSM.png
+    :scale: 100%
+    :align: center
+    :alt: button onpress después de release.
+
+Finalmente, el código de creación del botón instala un servicio de atención a interrupción ``button_gpio_isr_handler`` 
+que será disparado cada que el ESP32 detecte un cambio de flanco en el pin del pulsador.
+
 
 
 Sesión 2
