@@ -132,8 +132,8 @@ Te dejo una posible solución al ejercicio 6 de la unidad 2 para que estudies co
           }
       }
 
-Ejercicio 2: 23 de la unidad 2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ejercicio 2: ejercicio 3 de la unidad 2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Estudia con mucho cuidado esta solución al ejercicio 23 de la unidad 2. Aquí te presento 
 a manera de introducción una técnica de modelado de software conocida como máquinas de 
@@ -828,8 +828,128 @@ Ignora entonces la parte de C++.
   ``iot_button_rm_cb``: elimina una de las funciones programadas con ``iot_button_set_evt_cb``.
 
 
-Ejercicio 9: código del componente button: button.c
+Ejercicio 9: funcionamiento del componente button:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Lo primero que se requiere para usar el componente button es crear un objeto button:
+
+.. code-block:: c
+
+    button_handle_t btn_handle = iot_button_create(JUMPSTART_BOARD_BUTTON_GPIO, JUMPSTART_BOARD_BUTTON_ACTIVE_LEVEL);
+
+Nota que le pasamos el pin y el nivel lógico que genera el pulsador al presionarse.
+
+¿Cómo funciona este componente?
+
+La siguiente figura ilustra el funcionamiento básico:
+
+.. image:: ../_static/button-filter.png
+    :scale: 100%
+    :align: center
+    :alt: funcionamiento de button
+
+Los flancos de bajada y subida en el pin del pulsador disparan una interrupción cuya única función es reiniciar los temporizadores 
+de push o el temporizador de release. Los flancos de bajada reinician el temporizador de push y los flancos de subida el temporizador de 
+release. Si alguno de los temporizadores llega a ``BUTTON_GLITCH_FILTER_TIME_MS`` ms sin reiniciarse quiere decir que la señal del pulsador 
+estuvo estable por ``BUTTON_GLITCH_FILTER_TIME_MS`` ms y se procede a validar el nuevo estado del pulsador ya sea ``BUTTON_STATE_PUSH`` o 
+``BUTTON_STATE_IDLE``.
+
+Sobre este función básica se pueden programar callbacks o funciones definidas por el usuario que serán llamados cuando se detecten algunas 
+condiciones particulares.
+
+Esta función permite programar un callback al detectar un cambio al estado ``BUTTON_STATE_PUSH``. En el siguiente ejemplo la variable 
+``btn_cb`` será un puntero al callback:
+
+.. code-block:: c
+        
+    iot_button_set_evt_cb(btn_handle, BUTTON_CB_PUSH, gen_btn_cb, "push");    
+
+Esta función programa un callback al detectarse un cambio al estado ``BUTTON_STATE_IDLE``:
+
+.. code-block:: c
+
+    iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE, btn_cb, "RELEASE");
+
+
+Esta función programa un callback al detectarse un cambio al estado ``BUTTON_STATE_PRESSED``. En el ejemplo, luego de 2 segundos 
+en ``BUTTON_STATE_PUSH`` el botón pasará al estado ``BUTTON_STATE_PRESSED``:
+
+
+.. code-block:: c
+
+    iot_button_add_on_press_cb(btn_handle, 2, press_btn_cb, "press 2");
+
+.. image:: ../_static/button-press.png
+    :scale: 100%
+    :align: center
+    :alt: button press
+
+Esta función programa un callback al detectarse un ``TAP``:
+
+.. code-block:: c
+
+    iot_button_set_evt_cb(btn_handle, BUTTON_CB_TAP, gen_btn_cb, "tap");
+
+Es importante aclarar que un ``TAP`` solo es generado si el pulsador se libera sin pasar por el estado ``BUTTON_STATE_PRESSED`` 
+como muestra esta figura:
+
+.. image:: ../_static/button-tap.png
+    :scale: 100%
+    :align: center
+    :alt: button press
+
+Nota que el evento ``RELEASE`` también sería generado si el callback se programa. Si el botón llega al estado ``BUTTON_STATE_PRESSED``  
+al liberar el botón no ocurrirá un ``TAP``:
+
+.. image:: ../_static/button-sintap.png
+    :scale: 100%
+    :align: center
+    :alt: button press
+
+Estas funciones programan callbacks al detectar que el botón está en el estado ``BUTTON_STATE_PRESSED`` en varios instantes de 
+tiempos (2, 4 y 6 segundos):
+
+.. code-block:: c
+
+    iot_button_add_on_press_cb(btn_handle, 2, press_btn_cb, "on press 1");
+    iot_button_add_on_press_cb(btn_handle, 4, press_btn_cb, "on press 2");
+    iot_button_add_on_press_cb(btn_handle, 6, press_btn_cb, "on press 3");
+
+La siguiente figura ilustra el funcionamiento:
+
+.. image:: ../_static/button-onpress.png
+    :scale: 100%
+    :align: center
+    :alt: button press
+
+Esta función programa callbacks al detectarse que el botón está presionado 3 segundos (``start_after_sec``) después de cambiar 
+a ``BUTTON_STATE_PUSH`` y luego cada 1500 ms (interval_tick) mientras continúe presionado.
+
+.. code-block:: c
+
+    iot_button_set_serial_cb(btn_handle, 3, 1500/portTICK_PERIOD_MS, gen_btn_cb, "serial");
+
+La siguiente figura ilustra el funcionamiento:
+
+.. image:: ../_static/button-serial.png
+    :scale: 100%
+    :align: center
+    :alt: button press
+
+Finalmente, esta función reporta en el estado ``BUTTON_STATE_IDLE`` del botón el mayor tiempo programado 
+en el estado ``BUTTON_STATE_PRESSED`` 
+
+.. code-block:: c
+
+    iot_button_add_on_release_cb(btn_handle, 6, rls_btn_cb, "release 6");
+
+La siguiente figura ilustra el funcionamiento:
+
+.. image:: ../_static/button-releaseAfterpress.png
+    :scale: 100%
+    :align: center
+    :alt: button onpress después de release.
+
 
 Para entender el código debes tener a la mano la definición de dos objetos: ``typedef struct button_dev button_dev_t;`` y
 ``typedef struct btn_cb button_cb_t;``
@@ -863,13 +983,13 @@ De dejo aquí el código a la mano con la definición del tipo de objetos.
         button_cb_t *cb_head;
     };
 
-``button_cb_t``:
+``button_cb_t``: objeto para configurar una función a ser llamada por el componente o callback.
 
-* ``interval``: indica en qué momento debe llamarse la función de usuario especificada o callback.
+* ``interval``: indica en qué momento debe llamarse el callback.
 * ``button_cb``: almacena la dirección en memoria del callback.
 * ``arg``: almacena la dirección de memoria de los argumentos que serán pasados al callback.
-* ``on_press``: si está en 1 indica que este objeto se trata del configurado con iot_button_add_on_press_cb.
-* ``tmr``: almacena el manejador del timer por software creado en el sistema operativo.
+* ``on_press``: si está en 1 indica que este objeto es para un callback programado con iot_button_add_on_press_cb.
+* ``tmr``: almacena el identificador del timer por software creado en el sistema operativo.
 * ``pbtn``: almacena la dirección del button al cual está asociado este callback.
 * ``next_cb``: almacena la dirección de un nuevo callback que se le configuró al button.
 
