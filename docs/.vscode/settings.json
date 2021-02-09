@@ -3,11 +3,16 @@
     "restructuredtext.confPath": "${workspaceFolder}",
     "cSpell.language": "en,es",
     "cSpell.words": [
+        "Espressif",
         "Finalización",
+        "Kconfig",
+        "PREPROCESADO",
         "autocompletar",
         "conectividad",
+        "configurables",
         "microcontrolador",
         "navegarlo",
+        "preprocesador",
         "presencialidad",
         "provisionamiento"
     ]
