@@ -724,7 +724,7 @@ Se hacen dos cosas:
 * iot_button_create: crea el botón,
 * iot_button_set_evt_cb: configura cómo se comunicará el código del componente button con el código de la aplicación. Nota que 
   al componete button le estamos diciendo que al liberar el pulsador luego de ser presionado (``BUTTON_CB_RELEASE``) se debe 
-  llamar la función ``push_btn_cb`` cuya dirección la guardamos en el puntero ``btn_cb`` al llamar la función ``configure_push_button``. 
+  llamar la función ``push_btn_cb`` cuya dirección fue guardamos en el puntero ``btn_cb`` al momento de llamar la función ``configure_push_button``. 
   Observa entonces que ``push_btn_cb`` simplemente cambiará de estado el LED.
 
   .. code-block:: c
@@ -754,10 +754,10 @@ Ignora entonces la parte de C++.
       #endif
 
   Esto es una versión estándar, del ``#pragma once`` que viste en ``app_priv.h``. ¿Qué quiere decir 
-  estándar?  No todas las herramientas soportan la directiva ``#pragma once``, pero todos si soportan 
+  estándar?  No todas las herramientas soportan la directiva ``#pragma once``, pero todas si soportan 
   una definición estándar. 
 
-* Las siguiente líneas: 
+* En las siguientes líneas: 
 
   .. code-block:: c
 
@@ -797,20 +797,16 @@ Ignora entonces la parte de C++.
 
       }
   
-* Observa ahora las funciones públicas que tienes disponibles para usar el componente. Nota que en el propio archivo, en la parte 
-  superior de cada función te indican cómo usarla. Te dejo un listado rápido de las funciones:
+* Observa ahora las funciones públicas que tienes disponibles para usar el componente. Nota que en el propio archivo 
+  ``iot_button.h`` , en la parte superior de cada función te indican cómo usarla.
 
-  .. code-block:: c
-
-      button_handle_t iot_button_create(gpio_num_t gpio_num, button_active_t active_level);
-      esp_err_t iot_button_set_serial_cb(button_handle_t btn_handle, uint32_t start_after_sec, TickType_t interval_tick, button_cb cb, void *arg);
-
+  Te dejo aquí una descripción corta de cada función:  
 
   ``iot_button_create``: crear un button en memoria. Debes especificar el valor lógico del botón cuando esté presionado.
   
-  ``iot_button_set_serial_cb``: con esta función puedes indicar que se llame una de TUS FUNCIONES si luego de ``start_after_sec`` segundos 
-  el pulsador continua presionado. Mientras que el pulsador esté presionado se llamara cada ``interval_tick`` ticks tu función de manera 
-  constante.
+  ``iot_button_set_serial_cb``: con esta función puedes indicar que se llame una de TUS FUNCIONES siempre que luego de 
+  ``start_after_sec`` segundos el pulsador esté presionado. Mientras que el pulsador esté presionado se llamara cada 
+  ``interval_tick`` ticks tu función de manera constante.
 
   ``iot_button_set_evt_cb``: te permite configurar el llamado de una de TUS FUNCIONES cuando ocurran estos eventos: el pulsador 
   se presionó, el pulsador se liberó luego de ser presionado, pulsaste y soltaste rápidamente el pulsador, es decir, un TAP.
@@ -871,8 +867,8 @@ Esta función programa un callback al detectarse un cambio al estado ``BUTTON_ST
     iot_button_set_evt_cb(btn_handle, BUTTON_CB_RELEASE, btn_cb, "RELEASE");
 
 
-Esta función programa un callback al detectarse un cambio al estado ``BUTTON_STATE_PRESSED``. En el ejemplo, luego de 2 segundos 
-en ``BUTTON_STATE_PUSH`` el botón pasará al estado ``BUTTON_STATE_PRESSED``:
+Esta función programa un callback al detectarse un cambio al estado ``BUTTON_STATE_PRESSED``. En el ejemplo, luego de press_sec segundos 
+después del último flanco de bajada el botón pasará al estado ``BUTTON_STATE_PRESSED``:
 
 
 .. code-block:: c
@@ -936,8 +932,7 @@ La siguiente figura ilustra el funcionamiento:
     :align: center
     :alt: button press
 
-Finalmente, esta función reporta en el estado ``BUTTON_STATE_IDLE`` del botón el mayor tiempo programado 
-en el estado ``BUTTON_STATE_PRESSED`` 
+Finalmente, esta función reporta, al liberarse el pulsador, el último callback ``on_release``:
 
 .. code-block:: c
 
@@ -985,12 +980,13 @@ Observa la definición de los objetos:
         button_cb_t *cb_head;
     };
 
-``button_cb_t``: objeto para configurar una función del usuario que llamará el componente o callback.
+``button_cb_t``: objeto para configurar una función del usuario o callback. Cada objeto de este tipo tiene 
+estos campos:
 
 * ``interval``: indica en qué momento debe llamarse el callback.
 * ``button_cb``: almacena la dirección en memoria del callback.
 * ``arg``: almacena la dirección de memoria de los argumentos que serán pasados al callback.
-* ``on_press``: si está en 1 indica que este objeto es para un callback programado con iot_button_add_on_press_cb.
+* ``on_press``: si está en 1 indica que este objeto tiene un callback tipo ``on_press``.
 * ``tmr``: almacena el identificador del timer utilizado para programar el callback.
 * ``pbtn``: almacena la dirección del button al cual está asociado este callback.
 * ``next_cb``: almacena la dirección de un nuevo callback ``on_press`` y/o ``on_release`` programado al 
@@ -1009,7 +1005,7 @@ Observa la definición de los objetos:
 * ``tap_short_cb``: almacena el callback de TAP.
 * ``tap_psh_cb``: almacena el callback de PUSH.
 * ``tap_rls_cb``: almacena el callback de RELEASE (BUTTON_STATE_IDLE).
-* `press_serial_cb`: almacena la dirección del siguiente objeto de tipo ``on_press`` y/o ``on_release``.
+* ``press_serial_cb``: almacena la dirección del siguiente objeto de tipo ``on_press`` y/o ``on_release``.
 
 Analicemos ahora la función ``iot_button_create``:
 
@@ -1057,14 +1053,9 @@ Nota dos llamados al sistema que estamos utilizando ``xQueueCreate`` y ``xTimerC
 sirve para crear una cola de mensajes y el segundo para crear un temporizador por software.
 
 `Las colas de mensajes <https://www.freertos.org/a00018.html>`__, como su nombre lo indican permiten intercambiar 
-información entre partes del código utilizando 
-como intermediario al sistema operativo. En este caso la cola será usada por los callback de tipo on_release para 
-almancear en una cola la dirección del callback y del argumento a llamar en este caso:
-
-.. image:: ../_static/button-releaseAfterpress.png
-    :scale: 100%
-    :align: center
-    :alt: button onpress después de release.
+información entre partes del código. Las colas son controladas directamente por el sistema operativo. En el componente 
+se utilizarán dos colas. Una para almacenar la dirección del callback tipo on_release y la otra para almancear 
+el argumento del callback.
 
 Las colas siempre tendrán la dirección del último callback y el último argumento programado anterior al estado 
 ``BUTTON_STATE_IDLE``.
@@ -1132,10 +1123,9 @@ de los temporizadores; sin embargo, cabe destacar dos cosas:
   recursos de procesamiento. Mientras se está ejecutando una tarea puede ocurrir una interrupción. Lo normal es que se 
   suspenda la tarea, se ejecute la interrupción y luego se retome la tarea suspendida justo en el punto en el cual 
   fue interrumpida; sin embargo, Si al hacer un llamado al sistema operativo en el servicio de atención a
-  interrupción se ACTIVA una tarea de mayor prioridad que la tareas SUSPENDIDA, al terminar de ejecutar el servicio 
-  no se debería retomar en la tarea de menor prioridad sino iniciar la tarea de mayor prioridad. Una vez esta termine 
-  se continua con la tarea de menor prioridad suspendida justo en el mismo punto donde fue interrumpida. La variable 
-  ``HPTaskAwoken`` permite saber si al llamar un servicio del sistema se activó una tarea de mayor prioridad y de esta 
+  interrupción se ACTIVA una tarea de mayor prioridad que la tarea SUSPENDIDA, al terminar de ejecutar el servicio de 
+  atención a interrupción no se debería retomar en la tarea de menor prioridad sino iniciar la tarea de mayor prioridad.
+  La variable ``HPTaskAwoken`` permite saber si al llamar un servicio del sistema se activó una tarea de mayor prioridad y de esta 
   manera antes de terminar el servicio de atención a interrupción se puede invocar el llamado al sistema ``portYIELD_FROM_ISR`` 
   para iniciar la tarea de mayor prioridad en vez de continuar con la tarea de menor prioridad.
 
@@ -1156,13 +1146,16 @@ Ejercicio 13: RETO 2
 Al tratar de reproducir la figura del callback serial vas a encontrar un error en el código del componente. 
 ¿Te animas a corregir el error y a reproducir la figura?
 
-Ejercicio 14: SOLO PARA LOS MÁS CURISOS
+Ejercicio 14: SOLO PARA LOS MÁS CURIOSOS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En este curso no tenemos tiempo de estudiar a fondo cada detalle del sistema operativo FreeRTOS; sin embargo, 
 hay un tutorial MUY MUY bueno que pudes hacer una vez termines el curso o antes si tienes mucho tiempo libre.
 
 El tutorial está `aquí <https://www.freertos.org/fr-content-src/uploads/2018/07/161204_Mastering_the_FreeRTOS_Real_Time_Kernel-A_Hands-On_Tutorial_Guide.pdf>`__. 
+
+Luego de hacer el tutorial te recomiendo leer `este <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/freertos-smp.html>`__ enlace donde 
+el fabricante te cuenta algunas adaptaciones que tuvo que hacerle al FreeRTOS para soportar la arquitectura multicore del ESP32. 
 
 Sesión 2
 -----------
