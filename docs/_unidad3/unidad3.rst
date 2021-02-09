@@ -1084,7 +1084,85 @@ leer el código button.c:
 Finalmente, el código de creación del botón instala un servicio de atención a interrupción ``button_gpio_isr_handler`` 
 que será disparado cada que el ESP32 detecte un cambio de flanco en el pin del pulsador.
 
+Ejercicio 11: código del componente button: servicio de atención a interrupción  
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: c
+
+    static void button_gpio_isr_handler(void *arg)
+    {
+        button_dev_t *btn = (button_dev_t *) arg;
+        portBASE_TYPE HPTaskAwoken = pdFALSE;
+        int level = gpio_get_level(btn->io_num);
+        if (level == btn->active_level) {
+            if (btn->tap_psh_cb.tmr) {
+                xTimerStopFromISR(btn->tap_psh_cb.tmr, &HPTaskAwoken);
+                xTimerResetFromISR(btn->tap_psh_cb.tmr, &HPTaskAwoken);
+            }
+
+            button_cb_t *pcb = btn->cb_head;
+            while (pcb != NULL) {
+                if (pcb->tmr != NULL) {
+                    xTimerStopFromISR(pcb->tmr, &HPTaskAwoken);
+                    xTimerResetFromISR(pcb->tmr, &HPTaskAwoken);
+                }
+                pcb = pcb->next_cb;
+            }
+        } else {
+            // 50ms, check if this is a real key up
+            if (btn->tap_rls_cb.tmr) {
+                xTimerStopFromISR(btn->tap_rls_cb.tmr, &HPTaskAwoken);
+                xTimerResetFromISR(btn->tap_rls_cb.tmr, &HPTaskAwoken);
+            }
+        }
+        if (HPTaskAwoken == pdTRUE) {
+            portYIELD_FROM_ISR();
+        }
+    }
+
+Como te comenté antes, la única función del servicio de atención a interrupción será reiniciar el conteo 
+de los temporizadores; sin embargo, cabe destacar dos cosas:
+
+* ``xTimerStopFromISR``: nota que las funciones en el contexto de una interrupción terminan con FromISR. 
+  Esto es importante y es necesario que SIMPRE, SIEMPRE lo hagas al usar FreeRTOS.
+
+* ``HPTaskAwoken``: esta variable se pasa a todos los llamados al sistema utilizados en el contexto 
+  de un servicio de atención a interrupción. ¿Por qué? Recuerda que una aplicación en FreeRTOS puede estar compuesta 
+  por varias tareas. Algunas tareas tendrán mayor prioridad que otras, por lo que FreeRTOS las privilegiará con 
+  recursos de procesamiento. Mientras se está ejecutando una tarea puede ocurrir una interrupción. Lo normal es que se 
+  suspenda la tarea, se ejecute la interrupción y luego se retome la tarea suspendida justo en el punto en el cual 
+  fue interrumpida; sin embargo, Si al hacer un llamado al sistema operativo en el servicio de atención a
+  interrupción se ACTIVA una tarea de mayor prioridad que la tareas SUSPENDIDA, al terminar de ejecutar el servicio 
+  no se debería retomar en la tarea de menor prioridad sino iniciar la tarea de mayor prioridad. Una vez esta termine 
+  se continua con la tarea de menor prioridad suspendida justo en el mismo punto donde fue interrumpida. La variable 
+  ``HPTaskAwoken`` permite saber si al llamar un servicio del sistema se activó una tarea de mayor prioridad y de esta 
+  manera antes de terminar el servicio de atención a interrupción se puede invocar el llamado al sistema ``portYIELD_FROM_ISR`` 
+  para iniciar la tarea de mayor prioridad en vez de continuar con la tarea de menor prioridad.
+
+Ejercicio 12: RETO 1
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Con la información que te di hasta ahora te invito a 
+
+
+* Analiza y estudia con detenimiento el resto de código del componente  button. 
+
+* Luego realiza una copia al proyecto ``2_drivers`` y realiza experimentos que reproduzcan las figuras del 
+  ejercicio 9. PERO TEN CUIDADO con el callback serial. NO LO HAGAS AÚN, mira el siguiente reto.
+
+Ejercicio 13: RETO 2
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Al tratar de reproducir la figura del callback serial vas a encontrar un error en el código del componente. 
+¿Te animas a corregir el error y a reproducir la figura?
+
+Ejercicio 14: SOLO PARA LOS MÁS CURISOS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En este curso no tenemos tiempo de estudiar a fondo cada detalle del sistema operativo FreeRTOS; sin embargo, 
+hay un tutorial MUY MUY bueno que pudes hacer una vez termines el curso o antes si tienes mucho tiempo libre.
+
+El tutorial está `aquí <https://www.freertos.org/fr-content-src/uploads/2018/07/161204_Mastering_the_FreeRTOS_Real_Time_Kernel-A_Hands-On_Tutorial_Guide.pdf>`__. 
 
 Sesión 2
 -----------
