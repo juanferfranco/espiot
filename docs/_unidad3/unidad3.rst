@@ -132,7 +132,7 @@ Te dejo una posible solución al ejercicio 6 de la unidad 2 para que estudies co
           }
       }
 
-Ejercicio 2: ejercicio 3 de la unidad 2
+Ejercicio 2: ejercicio 23 de la unidad 2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Estudia con mucho cuidado esta solución al ejercicio 23 de la unidad 2. Aquí te presento 
