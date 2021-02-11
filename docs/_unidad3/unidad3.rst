@@ -132,7 +132,7 @@ Te dejo una posible solución al ejercicio 6 de la unidad 2 para que estudies co
           }
       }
 
-Ejercicio 2: ejercicio 3 de la unidad 2
+Ejercicio 2: ejercicio 23 de la unidad 2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Estudia con mucho cuidado esta solución al ejercicio 23 de la unidad 2. Aquí te presento 
@@ -1156,6 +1156,157 @@ El tutorial está `aquí <https://www.freertos.org/fr-content-src/uploads/2018/0
 
 Luego de hacer el tutorial te recomiendo leer `este <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/freertos-smp.html>`__ enlace donde 
 el fabricante te cuenta algunas adaptaciones que tuvo que hacerle al FreeRTOS para soportar la arquitectura multicore del ESP32. 
+
+Ejercicio 15: anexo, DEBUGGING para aventureros (SIN SOPORTE por parte del Profe)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+El ESP32 supporta la posibilidad de realizar Debugging utilizando una 
+interfaz `JTAG <https://en.wikipedia.org/wiki/JTAG>`__. 
+
+¿Qué necesitas para poder hacerlo?
+
+* Debes conseguir una intefaz USB a JTAG. Te recomiendo `esta <https://www.didacticaselectronicas.com/index.php/comunicaciones/bluetooth/programador-y-depurador-para-esp32-jtag-esp32-wi-fi-wifi-tarjetas-programadores-y-debugger-depuradores-para-esp32-esp8266-wifi-wi-fi-detail>`__. 
+* En `este <https://github.com/espressif/esp-iot-solution/blob/master/documents/evaluation_boards/ESP-Prog_guide_en.md>`__ 
+  enlace puedes encontrar documentación sobre la interfaz.
+* Debes tener la aplicación OPENOCD (viene con las herramientas del ESP-IDF).
+* Debes tener un cliente de GDB (viene con las herramientas del ESP-IDF).
+* Debes configurar tu entorno de desarrollo (eclipse, visual studio) para que 
+  se conecte a tu cliente GDB y puedas depurar en un enterno gráfico tu aplicación. Cabe 
+  aclara que también puedes hacer la depuración por consola.
+
+La siguiente figura ilustra cómo están conectados todos los elementos anteriores:
+
+.. image:: ../_static/jtag-debugging-overview.jpg
+    :scale: 75%
+    :align: center
+    :alt: how JTAG debugging works
+
+Puedes leer sobre el funcionamiento en `este <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/jtag-debugging/index.html#how-it-works>`__ 
+enlace.
+
+En la siguiente figura se ve el diagrama en bloques de la interfaz:
+
+.. image:: ../_static/esp-prog-bd.png
+    :scale: 100%
+    :align: center
+    :alt: ESP-PROG block diagram
+
+Observa que tienes dos conectores llamados PROG header y JTAG header. 
+PROG lo puedes utilizar para programar un módulo del ESP32 que montes 
+es tu propio hardware utilizando el puerto serial tal cual lo has 
+hecho usando el sistema de desarrollo.
+
+.. image:: ../_static/esp32-mod.jpg
+    :scale: 30%
+    :align: center
+    :alt: ESP32 mod
+
+Mira un ejemplo de una aplicación:
+
+.. image:: ../_static/customBoard.jpg
+    :scale: 15%
+    :align: center
+    :alt: custom board
+
+En esta figura puedes ver más detalles de la interfaz:
+
+.. image:: ../_static/esp-prog-label.png
+    :scale: 100%
+    :align: center
+    :alt: ESP-PROG labeled
+
+Cuando conectes la interfaz al computador notarás que aparecen dos puertos 
+seriales. COM X será el puerto del JTAG y COM X+1 de PROG.
+
+Para usar PROG debes tener dos jumpers: IO0 y PROG PWR SEL. Con el 
+jumper IO0 puesto la aplicación idf.py (esptool.py) podrá controlar el 
+ESP32 y ponerlo en modo boot. Si remueves el jumper IO0 tendrás que 
+poner el ESP32 en modo boot usando el boton boot: lo presionas y sin soltarlo 
+presionas el botón de RST. Con PROG PWR SEL puedes seleccionar el voltaje 
+que tendrá el pin VDD, en el conector PROG.
+
+¿Cómo puedes conectar tu sistema de desarrollo al conector de JTAG de la 
+interfaz?
+
+Observa esta figura:
+
+.. image:: ../_static/debugging-wiring.png
+    :scale: 75%
+    :align: center
+    :alt: JTAG Wiring
+
+Revisa de nuevo con esta tabla:
+
+=========  ========
+ESP-PROG    ESP32  
+=========  ========
+TCK         13 
+TDI         12
+TDO         15
+TMS         14
+GND         GND
+=========  ========
+
+Pasos preparatorios:
+
+#. Abre el acceso directo al ESP-IDF desde la terminal.
+#. Navega hasta uno de tus proyectos.
+#. Conecta la interfaz al computador.
+#. Lanza OPENOCD así:
+
+    .. image:: ../_static/openocd.png
+        :scale: 75%
+        :align: center
+        :alt: open openocd
+
+  Verifica que openocd reconoce tu interfaz y además el servidor se queda escuchando 
+  en el puerto 3333 a la espera de clientes GDB.
+
+#. Lo siguiente que debes hacer es asegurarte de grabar, como siempre, la aplicación 
+   en la memoria del microcontrolador.
+
+#. En este punto, ya debes tener corriendo el servidor openocd y la aplicación 
+   grabada en la memoria flash del ESP32. Ahora solo tienes que conectarte al servidor 
+   openocd con el cliente GDB:
+
+    .. code-block:: bash
+
+        idf.py gdbtui
+
+#. GDB se deberá conectar: 
+
+    .. image:: ../_static/gdbConsole.png
+      :alt:  gdb connection
+      :scale: 75%
+      :align: center    
+
+#. También deberás ver que el servidor acepta la conexión:
+
+   .. image:: ../_static/gdbConnect.png
+      :alt:  gdb connection
+      :scale: 75%
+      :align: center
+
+#. Prueba que puedes depurar colocando un breakpoint, ejecutando 
+   el programa hasta el breakpoint y luego ejecutando paso a paso:
+
+    .. image:: ../_static/debugSession.gif
+      :alt:  gdb connection
+      :scale: 75%
+      :align: center
+
+#. Una vez todo esto funcione, puedes configurar tu entorno de 
+   desarrollo para depurar directamente allí. En este caso ya no tendrías 
+   que hacer el paso de lanzar manualmente el cliente GDB ya que esta 
+   tarea la haría por ti tu entorno de desarollo.
+
+#. En `este <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/jtag-debugging/using-debugger.html>`__ 
+   enlace puedes ver cómo depurar en eclipse y por consola. Si estás trabajando con 
+   Visual Studio Code te recomiendo que instales y configures la extensión 
+   ESP-IDF para Visual Studio Code. `Aquí <https://github.com/espressif/vscode-esp-idf-extension/>`__ 
+   encontrarás toda la información necesaria para configurar la extensión y en 
+   `este <https://github.com/espressif/vscode-esp-idf-extension/blob/master/docs/DEBUGGING.md>`__ 
+   otro enlace la parte relativa al DEBUGGING. 
 
 Sesión 2
 -----------
