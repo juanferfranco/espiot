@@ -193,6 +193,39 @@ Ejercicio 7: reto 2
 * Vuelve a energizar tu AP y ahora verifica que el ESP32 reporte que está conectado 
   de nuevo.
 
+Ejercicio 8: profundizar un poco más en el funcionamiento
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Si quieres profundizar un poco más en el funcionamiento del WiFi dale una mirada 
+a `este artículo <https://medium.com/@mahavirj/esp-idf-wifi-networking-3eaebd11eb43>`__.
+
+Te dejo también un `enlace a un blog <https://medium.com/the-esp-journal>`__ donde puedes 
+mantenerte actualizo con las novedades del mundo de los ESP32.
+
+Ejercicio 9: networking
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: Para que hagas luego del curso
+
+    El estudio de la programación en red (networking programming) nos daría 
+    para un curso completo. Una de las ventajas que tiene el esp-idf es que podamos 
+    interactuar con el stack de TCPIP usando sockets POSIX.
+
+    Aunque está por fuera de los alcances de este curso corto, me gustaría que al 
+    menos le dieras una mirada superficial a algunas partes del material 
+    del curso sistemas operativos que dicto en el pregrado ingeniería de sistemas 
+    de la UPB en la facultad TIC para que te des una idea de cómo se puede utilizar 
+    la interfaz sockets POSIX para hacer networking. El material lo encuentras en 
+    `este sitio <https://sistemasoperativos.readthedocs.io/es/v2020.20/_semana15/semana15.html>`__.
+
+    Puedes ver en particular `esta presentación <https://sistemasoperativos.readthedocs.io/es/v2020.20/_semana15/semana15.html#ejemplo>`__ 
+    donde se explica qué es un socket y `este ejemplo <https://sistemasoperativos.readthedocs.io/es/v2020.20/_semana15/semana15.html#ejemplo>`__ 
+    , donde verás un servidor y un cliente TCP.
+
+    Adicionalmente, cuando termines el curso podrás seguir explorando y aprendiendo más con los 
+    ejemplos que vienen directamente con el esp-idf 
+    `aquí <https://github.com/espressif/esp-idf/tree/master/examples/protocols/sockets>`__.
+
 Sesión 2
 -----------
 
