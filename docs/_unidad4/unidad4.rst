@@ -141,7 +141,7 @@ La función inicializa el WiFi con valores por defecto (``WIFI_INIT_CONFIG_DEFAU
 y en modo STATION. Configura la red a la cual se conectará el ESP32 y dará la 
 orden iniciar en modo STATION. De este punto en adelante, la interacción 
 con la biblioteca se realizará por medio del administrador de eventos: ``event_handler``.
-Una vez la biblioteca configure correctamente el drive WiFi y el ESP32 en modo STATION,
+Una vez la biblioteca configure correctamente el driver WiFi y el ESP32 en modo STATION,
 se llamará un evento que permitirá finalmente conectarse a la red WiFi.
 
 .. code:: c
