@@ -42,7 +42,7 @@ Por lo pronto:
   flash del controlador.
 * Graba el programa en la memoria y lanza el monitor, el resultado debe ser este:
 
-.. code:: bash
+.. code-block:: bash
 
     ...
     I (858) wifi_init: rx ba win: 6
@@ -79,51 +79,51 @@ Ahora vamos a probar el otro método: SoftAP.
 
 * Modifica el código fuente en app_main.c en la función app_main() así:
 
-.. code:: c 
+  .. code-block:: c
 
-    wifi_prov_mgr_config_t config = {
-        /* What is the Provisioning Scheme that we want ?
-         * wifi_prov_scheme_softap or wifi_prov_scheme_ble */
+        wifi_prov_mgr_config_t config = {
+            /* What is the Provisioning Scheme that we want ?
+            * wifi_prov_scheme_softap or wifi_prov_scheme_ble */
 
-        //.scheme = wifi_prov_scheme_ble,
-        .scheme = wifi_prov_scheme_softap,
+            //.scheme = wifi_prov_scheme_ble,
+            .scheme = wifi_prov_scheme_softap,
 
-        /* Any default scheme specific event handler that you would
-         * like to choose. Since our example application requires
-         * neither BT nor BLE, we can choose to release the associated
-         * memory once provisioning is complete, or not needed
-         * (in case when device is already provisioned). Choosing
-         * appropriate scheme specific event handler allows the manager
-         * to take care of this automatically. This can be set to
-         * WIFI_PROV_EVENT_HANDLER_NONE when using wifi_prov_scheme_softap*/
+            /* Any default scheme specific event handler that you would
+            * like to choose. Since our example application requires
+            * neither BT nor BLE, we can choose to release the associated
+            * memory once provisioning is complete, or not needed
+            * (in case when device is already provisioned). Choosing
+            * appropriate scheme specific event handler allows the manager
+            * to take care of this automatically. This can be set to
+            * WIFI_PROV_EVENT_HANDLER_NONE when using wifi_prov_scheme_softap*/
 
-        //.scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
-        .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
+            //.scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
+            .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
 
-        /* Do we want an application specific handler be executed on
-         * various provisioning related events */
-        .app_event_handler = {
-            .event_cb = prov_event_handler,
-            .user_data = NULL
-        }
-    };
+            /* Do we want an application specific handler be executed on
+            * various provisioning related events */
+            .app_event_handler = {
+                .event_cb = prov_event_handler,
+                .user_data = NULL
+            }
+        };
 
 * No olvides borrar por completo la memoria flash del microcontrolador 
   para garantizar que las credenciales que guardamos usando el método anterior 
   se borren:
 
-.. code:: bash
+  .. code-block:: bash
 
-    idf.py -p /dev/ttyUSB0 -b 921600 erase_flash build flash monitor
+        idf.py -p /dev/ttyUSB0 -b 921600 erase_flash build flash monitor
 
-Debes ver en el monitor algo similar a esto:
+  Debes ver en el monitor algo similar a esto:
 
-.. code:: bash
+  .. code-block:: bash
 
-    I (989) wifi:Total power save buffer number: 16
-    W (989) wifi_prov_scheme_softap: Error adding mDNS service! Check if mDNS is running
-    I (999) wifi_prov_mgr: Provisioning started with service name : PROV_D38320 
-    I (1009) app_main: Provisioning started
+        I (989) wifi:Total power save buffer number: 16
+        W (989) wifi_prov_scheme_softap: Error adding mDNS service! Check if mDNS is running
+        I (999) wifi_prov_mgr: Provisioning started with service name : PROV_D38320 
+        I (1009) app_main: Provisioning started
 
 * En este momento tu ESP32 se ha convertido en un access point al cual puedes 
   comunicarte usando tu celular. Conéctate al AP que provee el ESP32, en mi caso 
@@ -131,13 +131,13 @@ Debes ver en el monitor algo similar a esto:
 
 * Una vez te conectes, verás algo similar a esto en el monitor:
 
-.. code:: bash
+  .. code-block:: bash
 
-    I (303949) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<0,0>, prof:1
-    I (303949) wifi:station: a8:9c:ed:d0:e8:e4 join, AID=1, bgn, 20
-    I (304119) esp_netif_lwip: DHCP server assigned IP to a station, IP is: 192.168.4.2
-    W (304369) httpd_uri: httpd_uri: URI '/' not found
-    W (304369) httpd_txrx: httpd_resp_send_err: 404 Not Found - This URI does not exis
+        I (303949) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<0,0>, prof:1
+        I (303949) wifi:station: a8:9c:ed:d0:e8:e4 join, AID=1, bgn, 20
+        I (304119) esp_netif_lwip: DHCP server assigned IP to a station, IP is: 192.168.4.2
+        W (304369) httpd_uri: httpd_uri: URI '/' not found
+        W (304369) httpd_txrx: httpd_resp_send_err: 404 Not Found - This URI does not exis
 
 * Ahora descarga la APP adecuada para tu sistema operativo móvil:
 
@@ -146,50 +146,25 @@ Debes ver en el monitor algo similar a esto:
 
 * Sigue las instrucciones en la aplicación.
 
-* Una vez termines de provisionar la aplicación reinicia el ESP32 y verás que ahora 
-  se conecta directamente a tu red WiFi:
-
-.. code:: bash 
-
-    ...
-    I (749) app_main: Already provisioned, starting Wi-Fi STA
-    I (839) phy: phy_version: 4500, 0cd6843, Sep 17 2020, 15:37:07, 0, 0
-    I (839) wifi:mode : sta (30:ae:a4:d3:83:20)
-    I (969) wifi:new:<6,0>, old:<1,0>, ap:<255,255>, sta:<6,0>, prof:1
-    I (969) wifi:state: init -> auth (b0)
-    I (979) wifi:state: auth -> assoc (0)
-    I (979) wifi:state: assoc -> run (10)
-    I (1089) wifi:connected with funcholandia, aid = 1, channel 6, BW20, bssid = c0:89:ab:e5:8f:61
-    I (1089) wifi:security: WPA2-PSK, phy: bgn, rssi: -39
-    I (1089) wifi:pm start, type: 1
-
-    I (1109) wifi:AP's beacon interval = 102400 us, DTIM period = 1
-    I (2129) esp_netif_handlers: sta ip: 192.168.1.1, mask: 255.255.255.0, gw: 192.168.1.254
-    I (2129) app_main: Connected with IP Address:192.168.1.1
-
-Nota algo interesante en el código:
-
-.. code:: c
-
-         *      - WIFI_PROV_SECURITY_1 is secure communication which consists of secure handshake
-         *          using X25519 key exchange and proof of possession (pop) and AES-CTR
-         *          for encryption/decryption of messages.
-         */
-        wifi_prov_security_t security = WIFI_PROV_SECURITY_1;
-
-La comunicación entre el ESP32 en modo AP y la aplicación móvil se asegura. Recuerda que todos 
-estos elementos están pensados para ``PRODUCCIÓN``.
+* Una vez termines de provisionar la aplicación, reinicia el ESP32 y verás que ahora 
+  se conecta directamente a tu red WiFi. 
 
 Ejercicios 4: protocolo de provisionamiento
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Los dos DEMOS anteriores son posibles gracias a un mecanismo de provisionamiento que 
-viene incluido en el ESP-IDF: 
-`Unified Provisioning <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#unified-provisioning>`__. 
+viene incluido en el ESP-IDF denominado Unified Provisioning. 
 
-Nota, que el código fuente de las aplicaciones móvil está disponible. Esto es un 
-excelente punto de partida para el ingeniería encargado de desarrollar la aplicación 
+Nota que el código fuente de las aplicaciones móvil está disponible. Esto es un 
+excelente punto de partida para el desarrollador encargado de implementar la aplicación 
 móvil personalizada para tu producto.
+
+.. warning:: La seguridad en IoT
+
+    En `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#unified-provisioning>`__ 
+    enlace puede estudiar con más detalle cómo funcionan el mecanismo de Unified Provisioning.
+
+    Ten presente que la seguridad es un tema de vital importancia en IoT.
 
 Ejercicios 5: código de la aplicación
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -197,7 +172,7 @@ Ejercicios 5: código de la aplicación
 Abre el archivo app_driver.c. Nota que el programa se ha modificado para incluir 
 la capacidad de borrar la credenciales usando el pulsador:
 
-.. code:: c 
+.. code-block:: c
 
     static void button_press_3sec_cb(void *arg)
     {
@@ -216,14 +191,14 @@ la capacidad de borrar la credenciales usando el pulsador:
 
 Nota la función:
 
-.. code:: c 
+.. code-block:: c
 
     iot_button_add_on_press_cb(btn_handle, 3, button_press_3sec_cb, NULL);
 
 Esta función te permitirá detectar, como ya sabes, si el botón lleva presionado al 
 menos 3 segundos. Si es es el caso observa que ocurrirán 2 cosas:
 
-.. code:: c
+.. code-block:: c
 
     static void button_press_3sec_cb(void *arg)
     {
@@ -239,7 +214,145 @@ se reiniciará el ESP32 y entrará de nuevo a modo provisioning.
 Ejercicios 6: código de la aplicación
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Ahora vamos a concentrarnos en ``app_main.c``. Primero recordemos el código de la unidad 
+anterior, pero a simplificado para entender los pasos más gruesos:
 
+.. code-block:: c
+
+    void app_main()
+    {
+        
+        (1) app_driver_init();
+        
+        (2) esp_err_t ret = nvs_flash_init();
+        (3) tcpip_adapter_init();
+        (4) esp_event_loop_init(event_handler, NULL);
+        (5) wifi_init_sta();
+        
+        while (1) 
+        {
+            ...
+        }
+    }
+
+.. code-block:: c
+
+    static void wifi_init_sta()
+    {
+        (6) wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+        (7) esp_wifi_init(&cfg);
+        (8) esp_wifi_set_storage(WIFI_STORAGE_RAM);
+        (9) esp_wifi_set_mode(WIFI_MODE_STA);
+
+        (10) wifi_config_t wifi_config = {
+            .sta = {
+                .ssid = EXAMPLE_ESP_WIFI_SSID,
+                .password = EXAMPLE_ESP_WIFI_PASS,
+            },
+        };
+        (11) esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+        (12) esp_wifi_start();
+    }
+
+Si analizas el código ``4_network_config`` verás que hasta el paso 
+(7) tenemos lo mismo de la Unidad anterior. ¿Qué es la nuevo 
+que debe soportar la aplicación?
+
+Antes de configurar el WiFi en modo STATION y conectarnos a una 
+red WiFi debes saber si tenemos o no las CREDENCIALES. Para 
+saber si el programa está provisionado se llama esta función:
+
+.. code-block:: c
+
+    wifi_prov_mgr_is_provisioned(&provisioned);
+
+La función guardará en la variable ``provisioned`` un valor booleano 
+que indicará si el ESP32 tiene o no las credenciales.
+
+Para poder llamar esta función es necesario que el MANEJADOR de 
+provisionamiento de WiFi esté inicializado:
+
+
+.. code-block:: c
+
+    wifi_prov_mgr_init(config);
+
+Si el ESP32 ya está provisionado, lo que pasemos en config realmente 
+no importa, pero si no lo está, entonces pasaremos de una vez 
+cómo queremos provisionar:
+
+.. code-block:: c
+
+    wifi_prov_mgr_config_t config = {
+        .scheme = wifi_prov_scheme_ble,
+        .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
+        .app_event_handler = {
+            .event_cb = prov_event_handler,
+            .user_data = NULL
+        }
+    };
+
+Recuerda que tenemos los métodos BLE y SoftAP. ``prov_event_handler`` será 
+el callback que utilizaremos para comunicar los eventos de ``wifi_prov_mgr`` 
+con la aplicación:
+
+Luego de llamar a ``wifi_prov_mgr_init(config)`` puede ocurrir una de dos cosas:
+
+.. code-block:: c
+
+    wifi_prov_mgr_init(config);
+
+    if (!provisioned) 
+    {
+        ...
+        (1) wifi_prov_mgr_start_provisioning(security, pop, service_name, service_key);
+    }
+    else
+    {
+        (2) wifi_prov_mgr_deinit();
+        (3) wifi_init_sta();
+    }
+
+* (2) y (3): como el ESP32 ya tenía las credenciales entonces en (2) se liberan 
+  la memoria reservada para el ``wifi_prov_mgr`` y en (3):
+
+  .. code-block:: c
+
+        esp_wifi_set_mode(WIFI_MODE_STA) );
+        esp_wifi_start();
+
+  Se configura el ESP32 en modo STATION y se intenta iniciarlo en ese modo. Recuerda 
+  que luego de este momento, la comunicación con el driver WiFi se hará mediante 
+  los callbacks definidos en ``event_handler``.
+
+* (1): inicializar el proceso de provisionamiento. Recuerda que los eventos 
+  producidos por ``wifi_prov_mgr`` en este caso se recibirán con ``prov_event_handler``:
+
+Ejercicios 7: reto
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Lee sección `código del proyecto <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#the-code>`__ 
+para profundizar un poco más en el funcionamiento y responder estas preguntas:
+
+* ¿Para qué se llama la función `wifi_prov_mgr_init`?
+* ¿Para qué sirve la partición NVS?
+* ¿Se implementa en la aplicación algún mecanismo para borrar la información 
+  en NVS?
+* ¿Cómo hace la aplicación para saber si el ESP32 tiene credenciales almacenadas o no?
+* ¿Cómo se seleccionar el método de provisionamiento?
+* Una vez el proceso de provisionamiento termina ¿Cómo se pueden liberar los recursos 
+  de memoria que este utiliza?
+* ¿El wifi_prov_mgr necesita conocer acerca de los eventos generados por el driver 
+  de WiFi?
+* ¿Con el ESP-IDF es posible brindar algún esquema de seguridad a la hora de enviar 
+  el nombre de la red WiFi y la contraseña del celular al ESP32? ¿Por qué crees 
+  que esto sea importante?
+* ¿Qué es la característica de prueba de posesión (``pop``) y para qué sirve? 
+* Piensa cómo utilizarías la prueba de posesión en un ambiente real de producción, describe 
+  cómo serían los pasos que seguiría un usuario de tu producto.
+
+* Para implementar en producción ``pop`` ¿Qué le quedaría faltando al código de esta 
+  unidad?
 
 Sesión 2
 -----------

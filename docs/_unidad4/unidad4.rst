@@ -33,7 +33,7 @@ archivo que antes. El código modela los siguientes procesos:
 
 Configura las constantes 
 
-.. code:: c 
+.. code-block:: c 
 
     #define EXAMPLE_ESP_WIFI_SSID EL_NOMBRE_DE_TU_RED_WIFI
     #define EXAMPLE_ESP_WIFI_PASS LA_CLAVE_DE_TU_RED
@@ -47,7 +47,7 @@ Ejercicio 3: nvs
 
 Observa de nuevo el siguiente código en ``app_main.c``:
 
-.. code:: c 
+.. code-block:: c
 
     ...
     /* Initialize NVS partition */
@@ -86,7 +86,7 @@ programación al usar el WiFi del ESP32:
 Nota que uno de los bloques es el stack de TCP/IP. Por tanto en ``app_main.c`` 
 se inicializa:
 
-.. code:: c
+.. code-block:: c
 
     /* Initialize TCP/IP and the event loop */
     tcpip_adapter_init();
@@ -97,13 +97,13 @@ la manera con la cual la biblioteca se comunica con tu aplicación.
 De regreso a ``app_main.c``, la siguiente línea de código le dice a la biblioteca 
 cuál será el callback de tu aplicación que deberá llamar cuando se produzcan los eventos:
 
-.. code:: c
+.. code-block:: c
 
     ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL) );
 
 Mira el callback:
 
-.. code:: c
+.. code-block:: c
 
     static esp_err_t event_handler(void *ctx, system_event_t *event)
     {
@@ -132,7 +132,7 @@ más.
 Finalmente, observa que estamos iniciando el ESP32 en modo ``Station`` para poder conectarnos 
 a un ``access point`` (el que tienes en tu casa).
 
-.. code:: c
+.. code-block:: c
 
     /* Start the station */
     wifi_init_sta();
@@ -144,7 +144,7 @@ con la biblioteca se realizará por medio del administrador de eventos: ``event_
 Una vez la biblioteca configure correctamente el driver WiFi y el modo de operación,
 se llamará a ``esp_wifi_start()`` para iniciar al ESP32 en modo STATION.
 
-.. code:: c
+.. code-block:: c
 
     static void wifi_init_sta()
     {
@@ -571,7 +571,7 @@ de un evento específico, haciendo que, mientras espera, no responda a otros eve
 
 Por ejemplo, unas líneas de código clásico Arduino: 
 
-.. code:: cpp
+.. code-block:: cpp
 
     void setup() {
         pinMode(LED_BUILTIN, OUTPUT);
