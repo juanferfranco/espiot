@@ -141,8 +141,8 @@ La función inicializa el WiFi con valores por defecto (``WIFI_INIT_CONFIG_DEFAU
 y en modo STATION. Configura la red a la cual se conectará el ESP32 y dará la 
 orden iniciar en modo STATION. De este punto en adelante, la interacción 
 con la biblioteca se realizará por medio del administrador de eventos: ``event_handler``.
-Una vez la biblioteca configure correctamente el driver WiFi y el ESP32 en modo STATION,
-se llamará un evento que permitirá finalmente conectarse a la red WiFi.
+Una vez la biblioteca configure correctamente el driver WiFi y el modo de operación,
+se llamará a ``esp_wifi_start()`` para iniciar al ESP32 en modo STATION.
 
 .. code:: c
 
@@ -550,7 +550,7 @@ lo haga en intervalos de tiempo distintos?
 
 Implementa tu solución.
 
-Ejercicio 15: ¿luego de los RTOS hay más?
+Ejercicio 15: ¿Luego de los RTOS hay más?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En este punto del recorrido hemos visitado diferentes maneras de desarrollar aplicaciones 
