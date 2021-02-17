@@ -1313,3 +1313,4 @@ Sesión 2
 
 En esta sesión vamos a resolver dudas sobre los ejercicios y escuchar aportes, 
 comentarios y/o experiencias de todos.
+
