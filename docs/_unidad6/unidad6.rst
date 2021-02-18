@@ -84,8 +84,8 @@ Se necesita:
 * El ESP32 tendrá que enviar a AWS IoT Core toda la información encriptada, 
   por tanto, necesitarás generar una CLAVE privada que almacenarás en el ESP32.
 * El ESP32 tendrá que asegurarse que si se está conectando 
-  a un servidor VERDADERO de AWS IoT Core. Entonces necesitarás el certificado del 
-  servidor para autenticarlo.
+  a un servidor VERDADERO de AWS IoT Core. Entonces necesitarás el certificado 
+  de la autoridad certificadora que firmó el certificado del servidor.
 * Amazon tiene servidores por todo el mundo, entonces tendrás que saber a cuál 
   servidor debes conectar el ESP32. A esto se le conoce como ENDPOINT.
 
@@ -178,12 +178,15 @@ un cliente que te permita CONTROLAR REMOTAMENTE el dispositivo.
 El cliente puede ser una aplicación desde un computador, el browser desde un 
 dispositivo móvil, una app, etc. En este caso vas a utilizar la terminal y un cliente 
 conocido como `CURL <https://curl.se/>`__. El protocolo que utilizará el cliente 
-para conectarse a AWS IoT Core será `HTTPS <https://en.wikipedia.org/wiki/HTTPS>`__ 
-mediante el `API WEB RESTful <https://en.wikipedia.org/wiki/Representational_state_transfer>`__ 
-que expone AWS IoT Core. Para Windows, puedes descargar curl 
-de `aquí <https://curl.se/windows/>`__.
+para conectarse a AWS IoT Core será `HTTPS <https://en.wikipedia.org/wiki/HTTPS>`__. La 
+interacción entre el cliente y AWS IoT Core se hará mediante el llamado 
+a funciones especiales en el servidor conocidas como 
+`API WEB RESTful <https://en.wikipedia.org/wiki/Representational_state_transfer>`__.
 
-Para leer el ESTADO actual del pulsador vas a necesitar ubicarte en la carpeta 
+Vas a necesitar entonces a CURL. Para Windows, lo puedes descargar de 
+`aquí <https://curl.se/windows/>`__.
+
+Para leer el ESTADO actual del pulsador debes ubicarte en la carpeta 
 ``esp-jumpstart/5_cloud/main/cloud_cfg`` y ejecutar:
 
 .. code-block:: bash
@@ -202,7 +205,7 @@ Ten presente:
 * En la dirección https debes colocar TU-ENDPOINT y TU-DEVICEID que encuentras 
   en los archivos endpoint.txt y deviceid.txt respectivamente.
 
-Para modificar colocar un ALTO en el LED ejecuta:
+Para modificar el estado del LED a ALTO ejecuta:
 
 .. code-block:: bash
 
@@ -222,7 +225,7 @@ aplicación en un servidor que se conecte a AWS IoT Core y te permita interactua
 tu ESP32. Adicionalmente, un cliente web ya sea móvil o no que se pueda conectar al servidor 
 y que interactúe, por medio del servidor, con el ESP32 utilizando una interfaz gráfica.
 
-¿Suena complicado? 
+¿Suena complicado? No será así con la herramienta que te voy a proponer.
 
 Para conseguir todo lo anterior vas a construir una aplicación usando 
 `Node-red <https://nodered.org/>`__. En este caso el servidor donde estará la aplicación 
@@ -237,7 +240,8 @@ plataformas como ilustra esta figura tomada de `este <https://nodered.org/>`__ s
 Sigue los siguientes pasos:
 
 Ingresa a `este <https://nodered.org/docs/getting-started/local>`__ sitio si tienes Linux. 
-Si tienes Windows a `este <https://nodered.org/docs/getting-started/windows>`__.
+Si tienes Windows a `este <https://nodered.org/docs/getting-started/windows>`__. Sigue 
+los pasos para instalar node-red.
 
 Lanza node-red desde la terminal con el comando ``node-red``.
 
@@ -260,7 +264,8 @@ Observa que al lanzar node-red en la terminal verás algo así:
     18 Feb 10:19:44 - [info] Started flows
     ...
 
-El programa o flujo que usarás es este: ``/home/juanfranco/.node-red/flows_pop-os.json``. 
+Nota que el mensaje anterior te informa que flujo ejecutará node-red.
+En mi caso será este ``/home/juanfranco/.node-red/flows_pop-os.json``. 
 Si quieres crear o abrir un flujo en particular puedes especificar el nombre así:
 
 .. code-block:: bash
@@ -292,8 +297,8 @@ Y se verá así cuando la lances desde tu browser
    :align: center
 
 El primer flujo (get). Colocará el botón GET en la interfaz de usuario. Al presionar 
-el botón se dispará el nodo AWS GET. Este nodo realizará una operación GET 
-en AWS IoT Core para obtener el estado del pulsador. Dicho estado, una vez, se reciba,
+el botón se disparará el nodo AWS GET. Este nodo realizará una operación GET 
+en AWS IoT Core para obtener el estado del pulsador. Dicho estado, una vez se reciba,
 será mostrado en la etiqueta ``https data``.
 
 El segundo nodo (ON), disparará un POST en AWS IoT core que encenderá el LED.
@@ -368,7 +373,8 @@ Flujo 1:
 
 * Si conoces la dirección IP de tu computador y deshabilitas momentánamente el firewall,
   si estás en Windows, podrás ver también la aplicación desde tu celular mediante 
-  el navegador web con ``http://IP-DE-COMPUTADOR:1880/ui``
+  el navegador web con ``http://IP-DE-COMPUTADOR:1880/ui``. No olvides que tu celular 
+  debe estar en la misma red que tu computador.
 
 Ejercicios 9: reto
 ^^^^^^^^^^^^^^^^^^^^^
