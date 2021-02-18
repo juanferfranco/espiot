@@ -145,8 +145,9 @@ La carpeta la encuentras en el directorio main del proyecto.
 
 Compila y ejecuta el programa. Deberás ver algo similar a esto:
 
-.. code-block:: bash
+.. code-block:: 
 
+    ...
     I (1324) wifi:AP's beacon interval = 102400 us, DTIM period = 1
     I (2324) esp_netif_handlers: sta ip: 192.168.1.1, mask: 255.255.255.0, gw: 192.168.1.254
     I (2324) app_main: Connected with IP Address:192.168.1.1
@@ -155,6 +156,7 @@ Compila y ejecuta el programa. Deberás ver algo similar a esto:
     I (2334) cloud: Connecting to AWS...
     I (4844) cloud: Update Shadow: {"state":{"reported":{"output":false}}, "clientToken":"esp32-0"}
     I (7394) cloud: Update accepted
+
 
 El ESP32 se debe conectar a tu red WiFi y luego a AWS IoT.
 
@@ -197,16 +199,20 @@ Ten presente:
   ESP32. En PRODUCCIÓN, deberías tener credenciales diferentes para cada tipo 
   de cliente.
 
-* En la dirección https debes colocar TU-ENDPOINT y TU-DEVICEID deviceid.txt
+* En la dirección https debes colocar TU-ENDPOINT y TU-DEVICEID que encuentras 
+  en los archivos endpoint.txt y deviceid.txt respectivamente.
 
+Para modificar colocar un ALTO en el LED ejecuta:
 
+.. code-block:: bash
 
+    curl -d '{"state":{"desired":{"output":true}}}' --tlsv1.2 --cert device.cert --key device.key https://TU-ENDPOINT:8443/things/TU-DEVICEID/shadow | python -mjson.tool
 
-curl --tlsv1.2 --cert cloud_cfg/device.cert \
-       --key cloud_cfg/device.key   \
-       https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \
-       | python -mjson.tool
+Para colocar un BAJO en el LED ejecuta:
 
+.. code-block:: bash
+
+    curl -d '{"state":{"desired":{"output":false}}}' --tlsv1.2 --cert device.cert --key device.key https://TU-ENDPOINT:8443/things/TU-DEVICEID/shadow | python -mjson.tool
 
 
 Sesión 2
