@@ -214,6 +214,177 @@ Para colocar un BAJO en el LED ejecuta:
 
     curl -d '{"state":{"desired":{"output":false}}}' --tlsv1.2 --cert device.cert --key device.key https://TU-ENDPOINT:8443/things/TU-DEVICEID/shadow | python -mjson.tool
 
+Ejercicios 8: app
+^^^^^^^^^^^^^^^^^^^^^
+
+En este ejercicio te voy a proponer que hagamos algo interesante. Que tal si construimos una 
+aplicación en un servidor que se conecte a AWS IoT Core y te permita interactuar con 
+tu ESP32. Adicionalmente, un cliente web ya sea móvil o no que se pueda conectar al servidor 
+y que interactúe, por medio del servidor, con el ESP32 utilizando una interfaz gráfica.
+
+¿Suena complicado? 
+
+Para conseguir todo lo anterior vas a construir una aplicación usando 
+`Node-red <https://nodered.org/>`__. En este caso el servidor donde estará la aplicación 
+lo vas a desplegar en tu propio computador; sin embargo, podrías desplegarlo en otras 
+plataformas como ilustra esta figura tomada de `este <https://nodered.org/>`__ sitio.
+
+.. image:: ../_static/node-red-hosts.png
+   :alt:  node red host alternatives
+   :scale: 75%
+   :align: center
+
+Sigue los siguientes pasos:
+
+Ingresa a `este <https://nodered.org/docs/getting-started/local>`__ sitio si tienes Linux. 
+Si tienes Windows a `este <https://nodered.org/docs/getting-started/windows>`__.
+
+Lanza node-red desde la terminal con el comando ``node-red``.
+
+Puedes ingresar al servidor mediante tu navegador web con: ``http://localhost:1880``
+
+Observa que al lanzar node-red en la terminal verás algo así:
+
+.. code-block:: bash
+
+    Welcome to Node-RED
+    ===================
+
+    ...
+    18 Feb 10:19:44 - [info] Settings file  : /home/juanfranco/.node-red/settings.js
+    18 Feb 10:19:44 - [info] Context store  : 'default' [module=memory]
+    18 Feb 10:19:44 - [info] User directory : /home/juanfranco/.node-red
+    18 Feb 10:19:44 - [warn] Projects disabled : editorTheme.projects.enabled=false
+    18 Feb 10:19:44 - [info] Flows file     : /home/juanfranco/.node-red/flows_pop-os.json
+    18 Feb 10:19:44 - [info] Starting flows
+    18 Feb 10:19:44 - [info] Started flows
+    ...
+
+El programa o flujo que usarás es este: ``/home/juanfranco/.node-red/flows_pop-os.json``. 
+Si quieres crear o abrir un flujo en particular puedes especificar el nombre así:
+
+.. code-block:: bash
+
+    node-red myapp.json
+
+Para construir la interfaz de usuario de la aplicación necesitas incluir un nodo. Ingresa 
+al Manage Palette:
+
+.. image:: ../_static/node-red-config.png
+   :alt:  add a node
+   :scale: 100%
+   :align: center
+
+En la pestaña Install busca e instala el nodo ``node-red-dashboard``.
+
+Ahora vas a crear el programa como tal. Observa la figura: 
+
+.. image:: ../_static/flow.png
+   :alt: flujo
+   :scale: 100% 
+   :align: center
+
+Y se verá así cuando la lances desde tu browser
+
+.. image:: ../_static/node-app-running.png
+   :alt:  node-red app running
+   :scale: 100%
+   :align: center
+
+El primer flujo (get). Colocará el botón GET en la interfaz de usuario. Al presionar 
+el botón se dispará el nodo AWS GET. Este nodo realizará una operación GET 
+en AWS IoT Core para obtener el estado del pulsador. Dicho estado, una vez, se reciba,
+será mostrado en la etiqueta ``https data``.
+
+El segundo nodo (ON), disparará un POST en AWS IoT core que encenderá el LED.
+
+El tercer nodo (OFF), disparará un POST en AWS IoT core que apagará el LED.
+
+Ahora vas a construir tu mismo cada flujo.
+
+Flujo 1:
+
+* Selecciona un nodo button (dashboard), http request (network), json (parser), 
+  text (dashboard) y debug (common).
+* Conecta los nodos tal como está en la figura que te mostré antes.
+* Configura cada nodo así:
+
+  .. image:: ../_static/flow1-get.png
+   :alt:  flujo 1 GET
+   :scale: 75%
+   :align: center    
+
+  Ten en cuenta que la propiedad Group la debes crear así:
+
+  .. image:: ../_static/flow1-UI.gif
+   :alt:  flujo 1 GET
+   :scale: 75%
+   :align: center
+
+  Ahora configura el nodo http request: 
+
+  .. image:: ../_static/flow1-Aws-get.png
+   :alt:  flujo 1 GET
+   :scale: 75%
+   :align: center 
+
+  Debes habilitar la opción Enable secure (SSL/TLS) connection y crear 
+  una configuración de seguridad así:
+
+  .. image:: ../_static/flow1-Aws-get-security.png
+   :alt:  seguridad AWS
+   :scale: 75%
+   :align: center 
+
+  El nodo json:
+
+  .. image:: ../_static/flow1-json.png
+   :alt:  json
+   :scale: 75%
+   :align: center 
+
+  El nodo text:
+
+  .. image:: ../_static/flow1-text.png
+   :alt:  text
+   :scale: 75%
+   :align: center 
+
+  El nodo debug:
+
+  .. image:: ../_static/flow1-debug.png
+   :alt: debug
+   :scale: 75%
+   :align: center 
+
+* Dale click al botón ``DEPLOY`` para lanzar la aplicación. Verifica que no hay 
+  errores. En caso contrario debes corregir los errores.
+* Ingresa al sitio ``http://127.0.0.1:1880/ui`` para ver la aplicación. verás algo así:
+
+.. image:: ../_static/flow1.png
+   :alt:  flujo 1
+   :scale: 75%
+   :align: center
+
+* Si conoces la dirección IP de tu computador y deshabilitas momentánamente el firewall,
+  si estás en Windows, podrás ver también la aplicación desde tu celular mediante 
+  el navegador web con ``http://IP-DE-COMPUTADOR:1880/ui``
+
+Ejercicios 9: reto
+^^^^^^^^^^^^^^^^^^^^^
+
+Construye los flujos 2 y 3. TEN PRESENTE ALGO MUY IMPORTANTE. Cuando configures 
+los nodos button, debes definir el Payload con el valor apropiado para cada caso.
+
+Mira:
+
+.. image:: ../_static/post-payload.png
+   :alt:  post payload
+   :scale: 100%
+   :align: center
+
+Y no olvides definir también la propiedad Group, para los button, usando el mismo 
+valor del button del flujo 1.
 
 Sesión 2
 -----------
