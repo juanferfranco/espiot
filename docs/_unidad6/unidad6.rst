@@ -47,7 +47,7 @@ se puede ver una arquitectura típica de una aplicación IoT:
 
 .. image:: ../_static/iot-universe.png
    :alt:  arquitectura IoT
-   :scale: 100%
+   :scale: 50%
    :align: center
 
 En nuestro caso, el ESP32 se conectará a la Nube por medio del servicio AWS IoT Core 
@@ -76,6 +76,8 @@ Se necesita:
 * Habilitar el servicio AWS IoT Core en tu cuenta.
 * Crear una ``Thing`` en AWS IoT Core que represente al ESP32 específico 
   que vas a conectar. 
+* En AWS IoT Core cada Thing debe tener configurada una POLÍTICA que 
+  indique que servicios de AWS IoT podrá usar la Thing.
 * El ESP32 deberá autenticarse con AWS IoT Core utilizando un certificado de cliente 
   X.509. Por tanto, tendrás que generar ese certificado y asociarlo con la 
   Thing de ese ESP32.
@@ -107,26 +109,103 @@ Para profundizar más al respecto te dejo un
 `EXCELENTE enlace <https://realtimelogic.com/articles/Certificate-Management-for-Embedded-Systems>`__ 
 que habla sobre este asunto específicamente para sistemas embebidos.
 
+Ejercicios 5: ¿Debo configurar entonces una cuenta en Amazon? 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ejercicios ?: introducción al proyecto
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Para este curso no es necesario porque Espressif nos ayuda con todo lo anterior en su 
+propia cuenta. En `esta <https://docs.espressif.com/projects/esp-jumpstart/en/latest/remotecontrol.html#quick-setup>`__ 
+sección te dan un enlace para enviar un correo que te responderán con todas las credenciales 
+necesarias para configurar tu dispositivo. Ten presente que estas credenciales solo 
+durarán, en teoría, 14 días. Si llegan a caducar puedes solicitar unas nuevas PERO con 
+otro correo.  
 
-Abre el proyecto ``5_cloud``. No olvides configurar los puertos 
-de entrada-salida correspondientes a tu hardware usando el archivo ``board_esp32_devkitc.h``.
+.. image:: ../_static/jump-start-cred.png
+   :alt:  correo con las credenciales
+   :scale: 75%
+   :align: center
 
-Lee la descripción de este proyecto `aquí <https://docs.espressif.com/projects/esp-jumpstart/en/latest/remotecontrol.html>`__.
+Como puedes ver en la figura, te deberán llegar:
 
-Ejercicios ?: ejecución del proyecto
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* device.key : clave privada para cifrar los mensajes.
+* device.cert : certificado del dispositivo para que AWS reconozca como válido
+  tu dispositivo.
+* server.cert : este es el certificado de CA AWS.
+* endpoint.txt: dirección del servidor a la cual se debe conectar tu dispositivo
+* deviceid.txt: nombre de la Thing que creo Espressif en su cuenta para 
+  tu dispositivo.
 
-En este proyecto el ESP32 se conectará a un servicio de Amazon en Internet conocido 
-como AWS IoT Core.
+Ejercicios 6: demo
+^^^^^^^^^^^^^^^^^^^
+
+Abre el proyecto ``5_cloud``. No olvides configurar los puertos de entrada-salida 
+correspondientes a tu hardware usando el archivo ``board_esp32_devkitc.h``.
+
+Guarda todos los archivos que te enviaron por correo en la carpeta ``cloud_cfg``. 
+La carpeta la encuentras en el directorio main del proyecto.
+
+Compila y ejecuta el programa. Deberás ver algo similar a esto:
+
+.. code-block:: bash
+
+    I (1324) wifi:AP's beacon interval = 102400 us, DTIM period = 1
+    I (2324) esp_netif_handlers: sta ip: 192.168.1.1, mask: 255.255.255.0, gw: 192.168.1.254
+    I (2324) app_main: Connected with IP Address:192.168.1.1
+    Starting cloud
+    I (2324) cloud: Shadow Init
+    I (2334) cloud: Connecting to AWS...
+    I (4844) cloud: Update Shadow: {"state":{"reported":{"output":false}}, "clientToken":"esp32-0"}
+    I (7394) cloud: Update accepted
+
+El ESP32 se debe conectar a tu red WiFi y luego a AWS IoT.
+
+Ejercicios 7: control remoto
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Recuerda de nuevo la figura con la arquitectura típica de una aplicación IoT:
+
+.. image:: ../_static/iot-universe.png
+   :alt:  arquitectura IoT
+   :scale: 50%
+   :align: center
+
+En este punto ya tienes conectado el dispositivo IoT a AWS IoT Core. Ahora conecta 
+un cliente que te permita CONTROLAR REMOTAMENTE el dispositivo.
+
+¿Cómo podemos conectar un cliente?
+
+El cliente puede ser una aplicación desde un computador, el browser desde un 
+dispositivo móvil, una app, etc. En este caso vas a utilizar la terminal y un cliente 
+conocido como `CURL <https://curl.se/>`__. El protocolo que utilizará el cliente 
+para conectarse a AWS IoT Core será `HTTPS <https://en.wikipedia.org/wiki/HTTPS>`__ 
+mediante el `API WEB RESTful <https://en.wikipedia.org/wiki/Representational_state_transfer>`__ 
+que expone AWS IoT Core. Para Windows, puedes descargar curl 
+de `aquí <https://curl.se/windows/>`__.
+
+Para leer el ESTADO actual del pulsador vas a necesitar ubicarte en la carpeta 
+``esp-jumpstart/5_cloud/main/cloud_cfg`` y ejecutar:
+
+.. code-block:: bash
+
+    curl --tlsv1.2 --cert device.cert --key device.key https://TU-ENDPOINT:8443/things/TU-DEVICEID/shadow | python -mjson.tool
+
+Ten presente:
+
+* Debes ejecutar curl desde el directorio cloud_cfg porque allí están los archivos 
+  device.cert y device.key.
+
+* Nota que para el cliente estás usando las mismas credenciales que para el 
+  ESP32. En PRODUCCIÓN, deberías tener credenciales diferentes para cada tipo 
+  de cliente.
+
+* En la dirección https debes colocar TU-ENDPOINT y TU-DEVICEID deviceid.txt
 
 
 
 
-
-
+curl --tlsv1.2 --cert cloud_cfg/device.cert \
+       --key cloud_cfg/device.key   \
+       https://a3orti3lw2padm-ats.iot.us-east-1.amazonaws.com:8443/things/<contents-of-deviceid.txt-file>/shadow \
+       | python -mjson.tool
 
 
 
