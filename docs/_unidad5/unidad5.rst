@@ -331,7 +331,7 @@ Luego de llamar a ``wifi_prov_mgr_init(config)`` puede ocurrir una de dos cosas:
 Ejercicios 7: reto
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Lee sección `código del proyecto <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#the-code>`__ 
+Lee la sección `código del proyecto <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#the-code>`__ 
 para profundizar un poco más en el funcionamiento y responder estas preguntas:
 
 * ¿Para qué se llama la función `wifi_prov_mgr_init`?
@@ -350,7 +350,6 @@ para profundizar un poco más en el funcionamiento y responder estas preguntas:
 * ¿Qué es la característica de prueba de posesión (``pop``) y para qué sirve? 
 * Piensa cómo utilizarías la prueba de posesión en un ambiente real de producción, describe 
   cómo serían los pasos que seguiría un usuario de tu producto.
-
 * Para implementar en producción ``pop`` ¿Qué le quedaría faltando al código de esta 
   unidad?
 
@@ -359,3 +358,4 @@ Sesión 2
 
 En esta sesión vamos a resolver dudas sobre los ejercicios y escuchar aportes, 
 comentarios y/o experiencias de todos.
+
