@@ -26,8 +26,8 @@ Para que este proyecto se pueda conectar a tu red WiFi vas a tener que configura
 credenciales utilizando un método de ``PRODUCCIÓN``, es decir, como lo haría un usuario 
 que reciba tu producto IoT.
 
-Y si el usuario quiere conectar el dispositivo a otra red WiFi ¿Qué hacer? de esta 
-pregunta también se ocupa este proyecto.
+Y si el usuario, luego, quiere conectar el dispositivo a otra red WiFi 
+¿Qué hacer? De esta pregunta también se ocupa este proyecto.
 
 Por tanto, este proyecto te permitirá aprender:
 
@@ -155,14 +155,14 @@ Ejercicios 4: protocolo de provisionamiento
 Los dos DEMOS anteriores son posibles gracias a un mecanismo de provisionamiento que 
 viene incluido en el ESP-IDF denominado Unified Provisioning. 
 
-Nota que el código fuente de las aplicaciones móvil está disponible. Esto es un 
+Nota que el código fuente de las aplicaciones móviles está disponible. Esto es un 
 excelente punto de partida para el desarrollador encargado de implementar la aplicación 
 móvil personalizada para tu producto.
 
 .. warning:: La seguridad en IoT
 
     En `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#unified-provisioning>`__ 
-    enlace puede estudiar con más detalle cómo funcionan el mecanismo de Unified Provisioning.
+    enlace puedes estudiar con más detalle cómo funcionan el mecanismo de Unified Provisioning.
 
     Ten presente que la seguridad es un tema de vital importancia en IoT.
 
@@ -331,7 +331,7 @@ Luego de llamar a ``wifi_prov_mgr_init(config)`` puede ocurrir una de dos cosas:
 Ejercicios 7: reto
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Lee sección `código del proyecto <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#the-code>`__ 
+Lee la sección `código del proyecto <https://docs.espressif.com/projects/esp-jumpstart/en/latest/networkconfig.html#the-code>`__ 
 para profundizar un poco más en el funcionamiento y responder estas preguntas:
 
 * ¿Para qué se llama la función `wifi_prov_mgr_init`?
@@ -350,7 +350,6 @@ para profundizar un poco más en el funcionamiento y responder estas preguntas:
 * ¿Qué es la característica de prueba de posesión (``pop``) y para qué sirve? 
 * Piensa cómo utilizarías la prueba de posesión en un ambiente real de producción, describe 
   cómo serían los pasos que seguiría un usuario de tu producto.
-
 * Para implementar en producción ``pop`` ¿Qué le quedaría faltando al código de esta 
   unidad?
 
@@ -359,3 +358,4 @@ Sesión 2
 
 En esta sesión vamos a resolver dudas sobre los ejercicios y escuchar aportes, 
 comentarios y/o experiencias de todos.
+
