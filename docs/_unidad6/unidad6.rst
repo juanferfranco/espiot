@@ -392,6 +392,86 @@ Mira:
 Y no olvides definir también la propiedad Group, para los button, usando el mismo 
 valor del button del flujo 1.
 
+Ejercicios 10: análisis del código -  EventGroups
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+En esta versión del proyecto se incluye un servicio más de FreeRTOS: los grupos de 
+eventos. Un grupo de eventos es una abstracción del sistema operativo que permite 
+agrupar un conjunto de eventos cada uno representado por un bit dentro del grupo de 
+eventos. Los grupos de eventos permiten sincronizar el funcionamiento de las tareas.
+
+En la siguiente figura se observa cómo son almacenados los eventos en FreeRTOS en 
+el esp-idf. Nota que por EventGroup puedes tener hasta 24 eventos de los cuales,
+en este ejemplo, solo se están usando 3.
+
+.. image:: ../_static/24-bit-event-group.gif
+   :alt:  Event Group
+   :scale: 50%
+   :align: center
+
+
+
+En el archivo ``app_main.c`` se usa un grupo de eventos para esperar que el ESP32 
+esté conectado a un AP y con dirección IP antes llamar a la función ``cloud_start()`` 
+que permitirá conectarse a AWS IoT Core:
+
+.. code-block:: c
+
+    ...
+    #include <freertos/event_groups.h>
+    ...
+
+    /* Signal Wi-Fi events on this event-group */
+    const int WIFI_CONNECTED_EVENT = BIT0;
+    static EventGroupHandle_t wifi_event_group;
+
+    static esp_err_t event_handler(void *ctx, system_event_t *event)
+    {
+        ...
+        case SYSTEM_EVENT_STA_GOT_IP:
+        ...
+            xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
+        ...
+    }
+
+    void app_main()
+    {
+        ...
+        wifi_event_group = xEventGroupCreate();
+        ...
+        /* Wait for Wi-Fi connection */
+        xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);
+        cloud_start();
+    }
+
+Se debe declarar una variable para almacenar el manejador del 
+`EventGroup <https://www.freertos.org/FreeRTOS-Event-Groups.html>`__ 
+de tal manera que puedas referirte a ese EventGroup específico en tu código: 
+``static EventGroupHandle_t wifi_event_group;``
+
+Se debe `crear el EventGroup <https://www.freertos.org/xEventGroupCreate.html>`__:  
+``wifi_event_group = xEventGroupCreate();``
+
+En la función app_main el programa se bloquea hasta que el evento WIFI_CONNECTED_EVENT 
+no se de. Nota que el evento será señalizado una vez se obtenga la dirección IP por parte 
+del Access Point al cual se conecte el ESP32: ``xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);``
+
+Para `esperar <https://www.freertos.org/xEventGroupWaitBits.html>`__ por la 
+señalización del evento se usa: 
+``xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);``
+
+En este caso la aplicación espera indefinidamente (portMAX_DELAY) a que se active 
+el evento WIFI_CONNECTED_EVENT en el EventGroup wifi_event_group.
+
+Ejercicios 11: análisis del código - Cloud Task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Luego de esperar por el evento WIFI_CONNECTED_EVENT, se crea la tarea ``aws_iot_task`` 
+definida en el archivo ``cloud_aws.c``.
+
+
+
+
 Sesión 2
 -----------
 
