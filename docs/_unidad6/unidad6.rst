@@ -467,10 +467,117 @@ Ejercicios 11: análisis del código - Cloud Task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Luego de esperar por el evento WIFI_CONNECTED_EVENT, se crea la tarea ``aws_iot_task`` 
-definida en el archivo ``cloud_aws.c``.
+definida en el archivo ``cloud_aws.c``. Esta tarea tiene por propósito conectarse 
+a AWS usando MQTT para reportar cambios en el LED producidos localmente o responder 
+a solicitudes de cambio del LED realizadas remotamente.
 
+AWS representa el estado del LED en una abstracción denominada ``SHADOW``. Un 
+shadow permite que las apps o servicios remotos tengan acceso al último estado 
+del LED reportado por el ESP32 (REPORTED). Así mismo, por medio del shadow las apps remotas
+puede indicar el estado deseado para el LED. De esta manera, cuando el dispositivo 
+IoT se conecte a AWS por MQTT, este le informará la solicitud realizada por la app (DESIRED) 
+y de esta manera el ESP32 podrá hacer el cambio en el estado del LED y REPORTAR ese 
+cambio.
 
+Las solicitudes a AWS se deben hacer por medio de un 
+`documento en formato JSON <https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html>`__ 
+que tiene la siguiente estructura:
 
+.. code-block:: javascript 
+
+    {
+        "state": {
+            "desired": {
+                "attribute1": integer2,
+                "attribute2": "string2",
+                ...
+                "attributeN": boolean2
+            },
+            "reported": {
+                "attribute1": integer1,
+                "attribute2": "string1",
+                ...
+                "attributeN": boolean1
+            }
+        },
+        "clientToken": "token",
+        "version": version
+    }
+
+El siguiente código muestra una versión simplificada de la tarea aws_iot_task. Nota 
+que hay un comentario al inicio de cada BLOQUE de código:
+
+.. code-block:: c 
+
+    void aws_iot_task(void *param)
+    {
+        ...
+        // (1) Inicia un shadow 
+        rc = aws_iot_shadow_init(&mqttClient, &sp);
+        ...
+
+        // (2) se queda intentando conectar a AWS IoT
+        do {
+            rc = aws_iot_shadow_connect(&mqttClient, &scp);
+            if(SUCCESS != rc) {
+                ESP_LOGE(TAG, "Error(%d) connecting to %s:%d", rc, sp.pHost, sp.port);
+                vTaskDelay(1000 / portTICK_RATE_MS);
+            }
+        } while (SUCCESS != rc);
+
+        ...
+
+        // (3) Crea la información para el JSON Document 
+        output_state = app_driver_get_state();
+        jsonStruct_t output_handler;
+        output_handler.cb = output_state_change_callback;
+        output_handler.pData = &output_state;
+        output_handler.dataLength = sizeof(output_state);
+        output_handler.pKey = "output";
+        output_handler.type = SHADOW_JSON_BOOL;
+        
+        // (4) Registra un callback llamado output_state_change_callback
+        // que se activará cada que el shadow del ESP32 lo cambie 
+        // una app externa.
+        
+        rc = aws_iot_shadow_register_delta(&mqttClient, &output_handler);
+        ...
+
+        // (5) Reporta el estado inicial del LED
+
+        size_t desired_count = 0, reported_count = 0;
+        reported_handles[reported_count++] = &output_handler;
+        rc = shadow_update(&mqttClient, reported_handles, reported_count, desired_handles,  desired_count);
+        reported_state = output_state;
+
+        // (6) Mantiene viva la conexión y actualiza 
+        // el estado del LED en su shadow en Amazon
+        // Si LOCALMENTE se solicita un cambio en el estado 
+        // se reportará que el nuevo estado del LED y también 
+        // que localmente se quería cambiar.
+
+        while (NETWORK_ATTEMPTING_RECONNECT == rc || NETWORK_RECONNECTED == rc || SUCCESS == rc) {
+
+            ...
+
+            output_state = app_driver_get_state();
+            if  (reported_state != output_state) {
+                reported_handles[reported_count++] = &output_handler;
+                if (output_changed_locally == true) {
+                    desired_handles[desired_count++] = &output_handler;
+                }
+                output_changed_locally = true;
+                reported_state = output_state;
+            }
+
+            if (reported_count > 0 || desired_count > 0) {
+                rc = shadow_update(&mqttClient, reported_handles, reported_count, desired_handles,  desired_count);
+            }
+
+            vTaskDelay(1000 / portTICK_RATE_MS);
+        }
+        ...
+    }
 
 Sesión 2
 -----------
