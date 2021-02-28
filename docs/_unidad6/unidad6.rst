@@ -119,6 +119,8 @@ necesarias para configurar tu dispositivo. Ten presente que estas credenciales s
 durarán, en teoría, 14 días. Si llegan a caducar puedes solicitar unas nuevas PERO con 
 otro correo.  
 
+La respuesta que te llegará al correo será similar a esta:
+
 .. image:: ../_static/jump-start-cred.png
    :alt:  correo con las credenciales
    :scale: 75%
@@ -234,7 +236,7 @@ plataformas como ilustra esta figura tomada de `este <https://nodered.org/>`__ s
 
 .. image:: ../_static/node-red-hosts.png
    :alt:  node red host alternatives
-   :scale: 75%
+   :scale: 50%
    :align: center
 
 Sigue los siguientes pasos:
@@ -264,7 +266,7 @@ Observa que al lanzar node-red en la terminal verás algo así:
     18 Feb 10:19:44 - [info] Started flows
     ...
 
-Nota que el mensaje anterior te informa que flujo ejecutará node-red.
+Nota que el mensaje anterior te informa cuál flujo ejecutará node-red.
 En mi caso será este ``/home/juanfranco/.node-red/flows_pop-os.json``. 
 Si quieres crear o abrir un flujo en particular puedes especificar el nombre así:
 
@@ -277,7 +279,7 @@ al Manage Palette:
 
 .. image:: ../_static/node-red-config.png
    :alt:  add a node
-   :scale: 100%
+   :scale: 50%
    :align: center
 
 En la pestaña Install busca e instala el nodo ``node-red-dashboard``.
@@ -286,24 +288,25 @@ Ahora vas a crear el programa como tal. Observa la figura:
 
 .. image:: ../_static/flow.png
    :alt: flujo
-   :scale: 100% 
+   :scale: 50% 
    :align: center
 
 Y se verá así cuando la lances desde tu browser
 
 .. image:: ../_static/node-app-running.png
    :alt:  node-red app running
-   :scale: 100%
+   :scale: 50%
    :align: center
 
-El primer flujo (get). Colocará el botón GET en la interfaz de usuario. Al presionar 
+El primer flujo (get) colocará el botón `GET <https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods>`__ 
+en la interfaz de usuario. Al presionar 
 el botón se disparará el nodo AWS GET. Este nodo realizará una operación GET 
 en AWS IoT Core para obtener el estado del pulsador. Dicho estado, una vez se reciba,
 será mostrado en la etiqueta ``https data``.
 
-El segundo nodo (ON), disparará un POST en AWS IoT core que encenderá el LED.
+El segundo nodo (ON) disparará un POST en AWS IoT core que encenderá el LED.
 
-El tercer nodo (OFF), disparará un POST en AWS IoT core que apagará el LED.
+El tercer nodo (OFF) disparará un POST en AWS IoT core que apagará el LED.
 
 Ahora vas a construir tu mismo cada flujo.
 
@@ -316,50 +319,54 @@ Flujo 1:
 
   .. image:: ../_static/flow1-get.png
    :alt:  flujo 1 GET
-   :scale: 75%
+   :scale: 50%
    :align: center    
 
+|
   Ten en cuenta que la propiedad Group la debes crear así:
 
   .. image:: ../_static/flow1-UI.gif
    :alt:  flujo 1 GET
-   :scale: 75%
+   :scale: 50%
    :align: center
 
+|
   Ahora configura el nodo http request: 
 
   .. image:: ../_static/flow1-Aws-get.png
    :alt:  flujo 1 GET
-   :scale: 75%
+   :scale: 50%
    :align: center 
 
+|
   Debes habilitar la opción Enable secure (SSL/TLS) connection y crear 
   una configuración de seguridad así:
 
   .. image:: ../_static/flow1-Aws-get-security.png
    :alt:  seguridad AWS
-   :scale: 75%
+   :scale: 50%
    :align: center 
 
+|
   El nodo json:
 
   .. image:: ../_static/flow1-json.png
    :alt:  json
-   :scale: 75%
+   :scale: 50%
    :align: center 
 
   El nodo text:
 
   .. image:: ../_static/flow1-text.png
    :alt:  text
-   :scale: 75%
+   :scale: 50%
    :align: center 
 
   El nodo debug:
 
   .. image:: ../_static/flow1-debug.png
    :alt: debug
-   :scale: 75%
+   :scale: 50%
    :align: center 
 
 * Dale click al botón ``DEPLOY`` para lanzar la aplicación. Verifica que no hay 
@@ -368,7 +375,7 @@ Flujo 1:
 
 .. image:: ../_static/flow1.png
    :alt:  flujo 1
-   :scale: 75%
+   :scale: 50%
    :align: center
 
 * Si conoces la dirección IP de tu computador y deshabilitas momentánamente el firewall,
@@ -411,9 +418,12 @@ en este ejemplo, solo se están usando 3.
 
 
 
-En el archivo ``app_main.c`` se usa un grupo de eventos para esperar que el ESP32 
-esté conectado a un AP y con dirección IP antes llamar a la función ``cloud_start()`` 
-que permitirá conectarse a AWS IoT Core:
+En el archivo ``app_main.c`` se usa un grupo de eventos para esperar a que el ESP32 
+esté conectado a un Access Point (AP) y tenga dirección IP asignada. Una vez se cumplan 
+las condiciones de espera será posible llamar a la función ``cloud_start()`` 
+que permitirá conectarse a AWS IoT Core.
+
+En el siguiente código se ven las partes relacionadas con el uso del EventGroup:
 
 .. code-block:: c
 
@@ -421,7 +431,7 @@ que permitirá conectarse a AWS IoT Core:
     #include <freertos/event_groups.h>
     ...
 
-    /* Signal Wi-Fi events on this event-group */
+    // (1) Definición del grupo y de un evento asociado al bit 0
     const int WIFI_CONNECTED_EVENT = BIT0;
     static EventGroupHandle_t wifi_event_group;
 
@@ -430,6 +440,7 @@ que permitirá conectarse a AWS IoT Core:
         ...
         case SYSTEM_EVENT_STA_GOT_IP:
         ...
+            // (2) Señalización del evento
             xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
         ...
     }
@@ -437,9 +448,10 @@ que permitirá conectarse a AWS IoT Core:
     void app_main()
     {
         ...
+        // (3) Creación del evento
         wifi_event_group = xEventGroupCreate();
         ...
-        /* Wait for Wi-Fi connection */
+        // (4) Espera por la ocurrencia del evento
         xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);
         cloud_start();
     }
@@ -475,8 +487,8 @@ AWS representa el estado del LED en una abstracción denominada ``SHADOW``. Un
 shadow permite que las apps o servicios remotos tengan acceso al último estado 
 del LED reportado por el ESP32 (REPORTED). Así mismo, por medio del shadow las apps remotas
 puede indicar el estado deseado para el LED. De esta manera, cuando el dispositivo 
-IoT se conecte a AWS por MQTT, este le informará la solicitud realizada por la app (DESIRED) 
-y de esta manera el ESP32 podrá hacer el cambio en el estado del LED y REPORTAR ese 
+IoT se conecte a AWS usando MQTT, AWS le informará la solicitud realizada por la app (DESIRED) 
+y el ESP32 podrá hacer el cambio en el estado del LED y REPORTAR a AWS ese 
 cambio.
 
 Las solicitudes a AWS se deben hacer por medio de un 
