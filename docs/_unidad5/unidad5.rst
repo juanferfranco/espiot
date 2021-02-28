@@ -339,13 +339,13 @@ para profundizar un poco más en el funcionamiento y responder estas preguntas:
 * ¿Se implementa en la aplicación algún mecanismo para borrar la información 
   en NVS?
 * ¿Cómo hace la aplicación para saber si el ESP32 tiene credenciales almacenadas o no?
-* ¿Cómo se seleccionar el método de provisionamiento?
+* ¿Cómo se selecciona el método de provisionamiento?
 * Una vez el proceso de provisionamiento termina ¿Cómo se pueden liberar los recursos 
   de memoria que este utiliza?
 * ¿El wifi_prov_mgr necesita conocer acerca de los eventos generados por el driver 
   de WiFi?
 * ¿Con el ESP-IDF es posible brindar algún esquema de seguridad a la hora de enviar 
-  el nombre de la red WiFi y la contraseña del celular al ESP32? ¿Por qué crees 
+  el nombre de la red WiFi y la contraseña desde el celular hasta el ESP32? ¿Por qué crees 
   que esto sea importante?
 * ¿Qué es la característica de prueba de posesión (``pop``) y para qué sirve? 
 * Piensa cómo utilizarías la prueba de posesión en un ambiente real de producción, describe 
