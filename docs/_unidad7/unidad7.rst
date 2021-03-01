@@ -6,6 +6,8 @@ Sesión 1
 
 En esta sesión analizaremos la estructura del proyecto ``6_ota``.
 
+Ejercicios
+-----------
 
 Ejercicios 1: introducción al proyecto
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
