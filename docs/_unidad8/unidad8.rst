@@ -7,6 +7,9 @@ Sesión 1
 En esta sesión analizaremos la estructura del proyecto ``7_mfg``.
 
 
+Ejercicios
+-----------
+
 Ejercicios 1: introducción al proyecto
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
