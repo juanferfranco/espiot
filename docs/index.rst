@@ -16,5 +16,4 @@ a proyectos de Internet de las cosas.
    Unidad 5: configuración de la red WiFi <_unidad5/unidad5>
    Unidad 6: nube <_unidad6/unidad6>
    Unidad 7: actualización remota <_unidad7/unidad7>
-..
    Unidad 8: fabricación <_unidad8/unidad8>
