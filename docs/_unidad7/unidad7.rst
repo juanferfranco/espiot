@@ -137,6 +137,13 @@ la siguiente línea, PERO editando el comando con tus datos.
 Nota que estamos enviando desde CURL la URL donde estará el archivo .bin con el 
 ejecutable tal como explican `aquí <https://docs.espressif.com/projects/esp-jumpstart/en/latest/firmwareupgrade.html#send-firmware-upgrade-url>`__.
 
+Ejercicio 10: SOLO PARA LOS MÁS CURIOSOS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Te dejo un enlace para que repases y profundices un poco más sobre OTA 
+`aquí <https://medium.com/the-esp-journal/ota-updates-framework-ab5438e30c12>`__.
+(Si no te abre el enlace intenta en modo incógnito).
+
 Sesión 2
 -----------
 
