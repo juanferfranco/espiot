@@ -155,6 +155,14 @@ programa para actualizar el firmware del ESP32?
 En `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/security.html#obtaining-ca-certificates>`__ 
 enlace puedes ver cómo obtener ese certificado.
 
+Ejercicio 12: SOLO PARA LOS MÁS CURIOSOS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+¿Cómo utilizar `postman <https://www.postman.com/downloads/>`__ para realizar los request a 
+AWS IoT Core y poder enviar órdenes al dispositivo?
+
+Lo puedes ver en `este <https://youtu.be/-kLtkkD-2uo>`__ video.
+
 Sesión 2
 -----------
 
