@@ -124,7 +124,7 @@ Ten PRESENTE que una vez ejecutes el proyecto, la aplicación CAMBIARÁ y ya no 
 cambiar de nuevo el firmware usando OTA porque la nueva aplicación no tiene considerada esta 
 funcionalidad.
 
-.. warning:: CONFIGURA correctamente de END-POINT
+.. warning:: CONFIGURA correctamente el END-POINT
 
    No olvides configurar TU END-POINT, en el sitio del fabricante el end-point 
    utilizado es del propio fabricante. 
@@ -145,6 +145,15 @@ Ejercicio 10: SOLO PARA LOS MÁS CURIOSOS
 Te dejo un enlace para que repases y profundices un poco más sobre OTA 
 `aquí <https://medium.com/the-esp-journal/ota-updates-framework-ab5438e30c12>`__.
 (Si no te abre el enlace intenta en modo incógnito).
+
+Ejercicio 11: SOLO PARA LOS MÁS CURIOSOS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+¿Cómo puedes obtener el certificado del servidor donde almacenarás la imagen de tu 
+programa para actualizar el firmware del ESP32?
+
+En `este <https://docs.espressif.com/projects/esp-jumpstart/en/latest/security.html#obtaining-ca-certificates>`__ 
+enlace puedes ver cómo obtener ese certificado.
 
 Sesión 2
 -----------
