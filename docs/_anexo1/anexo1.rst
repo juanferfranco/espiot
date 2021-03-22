@@ -365,6 +365,8 @@ este servicio tendrás que:
 
 * Instalar en tu celular la aplicación de Amazon alexa.
 * Habilitar en alexa el skill de RainMaker `aquí <https://www.amazon.com/-/es/ESP-RainMaker/dp/B0881W7RPV>`__.
+  o directamente en la aplicación móvil seleccionado la opción ``Más`` y luego Skills y juegos. 
+  Busca esp rainmaker y ``ACTIVA SKILL``.
 * Adicionar el dispositivo en tu app de alexa.
 
 Una vez hagas todo esto ya estás listo. Podrás controlar tu dispositivo con alexa.
@@ -375,6 +377,34 @@ Una vez hagas todo esto ya estás listo. Podrás controlar tu dispositivo con al
    :align: center
 
 .. image:: ../_static/alexaSwitch.jpeg
-   :alt:  captura alexa
+   :alt:  switch en alexa
    :scale: 50%
    :align: center
+
+Ejercicio 15: google Google Voice Assistant
+---------------------------------------------
+
+Puedes hacer lo mismo con el asistente de voz de Google.
+
+* Instala la aplicación Google Home.
+* Crea un Hogar.
+* Selecciona configuración.
+* En la parte inferior busca ``FUNCIONA CON GOOGLE``.
+* Busca esp RainMaker.
+* Vincula con tu cuenta en RainMaker.
+* Agrega los dispositivos. Te preguntará a qué habitación. 
+
+Ya estás listo!
+
+.. image:: ../_static/gva.jpeg
+   :alt:  captura gva
+   :scale: 50%
+   :align: center
+
+.. image:: ../_static/gvaSwitch.jpeg
+   :alt:  switch en gva
+   :scale: 50%
+   :align: center
+
+
+
