@@ -357,3 +357,24 @@ Ejercicio 13: arquitectura de la app en la nube
 
 `¿Cómo funciona rainmaker? <https://medium.com/the-esp-journal/esp-rainmaker-and-serverless-d144d8a71987>`__.
 
+Ejercicio 14: alexa de Amazon
+-------------------------------
+
+El ejemplo que estamos utilizando soporta servicios externos como alexa. Para activar 
+este servicio tendrás que:
+
+* Instalar en tu celular la aplicación de Amazon alexa.
+* Habilitar en alexa el skill de RainMaker `aquí <https://www.amazon.com/-/es/ESP-RainMaker/dp/B0881W7RPV>`__.
+* Adicionar el dispositivo en tu app de alexa.
+
+Una vez hagas todo esto ya estás listo. Podrás controlar tu dispositivo con alexa.
+
+.. image:: ../_static/alexa.jpeg
+   :alt:  captura alexa
+   :scale: 50%
+   :align: center
+
+.. image:: ../_static/alexaSwitch.jpeg
+   :alt:  captura alexa
+   :scale: 50%
+   :align: center
