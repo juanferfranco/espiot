@@ -17,19 +17,11 @@ te permitirá hacer aplicaciones IoT de manera rápida SIN tener que programar u
 aplicación móvil y sin tener que provisionar una infrastructure en la nube. SOLO te 
 concentras en la programación del sistema embebido.
 
-
-¿Qué viene incluido con RainMaker? 
-------------------------------------
-
-* Un SDK para programar el embebidos en C.
-* Un SDK para programar clientes en python.
-* Una aplicación móvil para Android y iOS LISTAS que se adaptan a cada aplicación 
-  que hagas.
-* Servicios en nube transparentes (listos para llevar) que utilizan un
-  esquema serverless.
+Ejercicios
+------------
 
 Ejercicio 1: ¿Cómo puedes comenzar?
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ya tienes todo lo que necesitas solo te falta descargar RainMaker y 
 descargar la aplicación móvil en un celular.
@@ -137,7 +129,7 @@ Para Descargar RainMaker sigue estos pasos:
   Nota que la zona horaria corresponde a la nuestra: ``-0500[>],``.
 
 Ejercicio 2: ¿Qué es rainmaker?
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En `este <https://medium.com/the-esp-journal/introducing-esp-rainmaker-8fa968bbb2de>`__ 
 enlace puedes leer al respecto. La siguiente figura tomada del sitio anterior resumen 
@@ -149,7 +141,7 @@ un poco de qué se trata:
    :align: center
 
 Ejercicio 3: mini-reto
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Luego de la lectura del ejercicio anterior, trata de resumir el flujo de desarrollo 
 con rainmaker.
@@ -157,7 +149,7 @@ con rainmaker.
 ¿Si quieres controlar o leer externamente un actuador o sensor qué debes hacer?
 
 Ejercicio 4: sobre el ejemplo switch
---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Revisa de nuevo los conceptos fundamentales de rainmaker en 
 `este <https://rainmaker.espressif.com/docs/spec-concepts.html>`__ enlace.
@@ -179,20 +171,20 @@ En `este <https://rainmaker.espressif.com/docs/firmware-dev.html>`__ enlace
 puedes estudiar cómo desarrollar tu propio programa usando rainmaker.
 
 Ejercicio 5: comunicaciones entre el nodo y la nube
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En `este <https://rainmaker.espressif.com/docs/node-cloud-comm.html>`__ enlace puedes leer 
 los detalles de comunicación entre el esp32 y la nube.
 
 Ejercicio 6: user-node mapping
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ¿Cómo se logra asociar un NODE a la aplicación móvil?
 
 Analiza el siguiente `enlace <https://rainmaker.espressif.com/docs/user-node-mapping.html#user---node-mapping>`__.
 
 Ejercicio 7: ¿Cómo se agreda un NODE a la nube
--------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Se realiza mediante un proceso denominado claiming que puedes consultar 
 `aquí <https://rainmaker.espressif.com/docs/claiming.html#claiming>`__. En particular, 
@@ -200,7 +192,7 @@ en el ejemplo de este anexo se utiliza la opción
 `Assisted Claiming <https://rainmaker.espressif.com/docs/claiming.html#assisted-claiming-esp32>`__.
 
 Ejercicio 8: servicio de OTA
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Rainmaker permite acceder al dispositivo por medio de un 
 `dashboard <https://dashboard.rainmaker.espressif.com/>`__ con el cual puedes hacer 
@@ -247,7 +239,7 @@ Prueba el servicio de OTA con el dashboard así:
   se haga de inmediato. Selecciona el botón Start OTA.
 
 Ejercicio 9: servicio de OTA desde terminal
---------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 También puedes hacer OTA desde la terminal utilizando la ``CLI`` de rainmaker.
 
@@ -332,33 +324,33 @@ Sigue estos pasos:
   Ten paciencia, si no te funciona prueba de nuevo.
 
 Ejercicio 10: servicio de tiempo
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Es un `servicio <https://rainmaker.espressif.com/docs/time-service.html#time-service>`__ 
 que permite al node sincronizar la hora y la fecha utilizando 
 SNTP y ajustarla según la zona horaria.
 
 Ejercicio 11: programación de eventos
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 El ejemplo switch también permite 
 `programar eventos <https://rainmaker.espressif.com/docs/scheduling.html>`__. Para hacerlo 
 deberás utilizar la aplicación móvil (ícono schedules).
 
 Ejercicio 12: que viene de nuevo en rainmaker
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 RainMaker es una herramienta en evolución, se 
 `ven venir <https://rainmaker.espressif.com/docs/what-next.html>`__ cosas interesantes.
 
 
 Ejercicio 13: arquitectura de la app en la nube
-------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 `¿Cómo funciona rainmaker? <https://medium.com/the-esp-journal/esp-rainmaker-and-serverless-d144d8a71987>`__.
 
 Ejercicio 14: alexa de Amazon
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 El ejemplo que estamos utilizando soporta servicios externos como alexa. Para activar 
 este servicio tendrás que:
@@ -382,7 +374,8 @@ Una vez hagas todo esto ya estás listo. Podrás controlar tu dispositivo con al
    :align: center
 
 Ejercicio 15: google Google Voice Assistant
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 Puedes hacer lo mismo con el asistente de voz de Google.
 
