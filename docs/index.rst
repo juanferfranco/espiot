@@ -18,3 +18,4 @@ a proyectos de Internet de las cosas.
    Unidad 7: actualización remota <_unidad7/unidad7>
    Unidad 8: fabricación <_unidad8/unidad8>
    Anexo 1: rainmaker <_anexo1/anexo1>
+   Anexo 2: enlaces de interés <_anexo2/anexo2>
