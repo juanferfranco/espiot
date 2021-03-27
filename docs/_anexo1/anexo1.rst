@@ -171,7 +171,7 @@ En `este <https://rainmaker.espressif.com/docs/firmware-dev.html>`__ enlace
 puedes estudiar cómo desarrollar tu propio programa usando rainmaker.
 
 Ejercicio 5: comunicaciones entre el nodo y la nube
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 En `este <https://rainmaker.espressif.com/docs/node-cloud-comm.html>`__ enlace puedes leer 
 los detalles de comunicación entre el esp32 y la nube.
@@ -184,7 +184,7 @@ Ejercicio 6: user-node mapping
 Analiza el siguiente `enlace <https://rainmaker.espressif.com/docs/user-node-mapping.html#user---node-mapping>`__.
 
 Ejercicio 7: ¿Cómo se agreda un NODE a la nube
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Se realiza mediante un proceso denominado claiming que puedes consultar 
 `aquí <https://rainmaker.espressif.com/docs/claiming.html#claiming>`__. En particular, 
